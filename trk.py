@@ -35,7 +35,7 @@ Basic task storage/layout:
 	ideally have it limit it to one priority / date / time per task, but we'll see about that
 	no limit to number of projects / contexts it can have
 	examples:
-		p2 d10/22@8pm submit lab 220.2 +cs220 @desktop ## (priority 2, due October 22 at 8pm
+		p2 d10/22@8pm submit lab 220.2 +cs220 @desktop
 		p2 finish work for Jim +msa @desktop
 		p1 d10/31 make Halloween costume
 		p1 d10/31 buy Halloween costume materials @shopping
@@ -43,10 +43,16 @@ Basic task storage/layout:
 		call Mom @phone
 '''
 
-
+def listLines(todoFile, match=''):
+	for line in todoFile:
+		if match in line:
+			print line
 
 def main(argv):
 	task='none'
+	filename='.todo'
+	todoFile=open(filename,'r+')
+
 	if len(argv)>0:
 		if argv[0] in ('finish','complete','delete'):
 			task=argv[1]
@@ -55,14 +61,18 @@ def main(argv):
 			task=argv[0]
 			if task[0]=='@':
 				print "List context '%s'" % task[1:]
+				listLines(todoFile,task)
 			elif task[0]=='+':
 				print "List project '%s'" % task[1:]
+				listLines(todoFile,task)
 			elif task[0]=='p':
 				print "List priority '%s'" % task[1:]
+				listLines(todoFile,task)
 			else:
 				print "Add '%s'" % task
 	else:
 		print 'List things'
+		listLines(todoFile)
 
 if __name__=='__main__':
 	main(sys.argv[1:])
