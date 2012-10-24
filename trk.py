@@ -13,6 +13,7 @@ CONFIG['hi_priority']=9
 CONFIG['hi_due']=14
 CONFIG['hi_done']=8
 CONFIG['file']='.todo'
+CONFIG['priority_char']='!'
 
 RE_PROJECT=re.compile(r'\s(\+\w+)')
 RE_CONTEXT=re.compile(r'\s(\@\w+)')
@@ -86,7 +87,7 @@ def formatLine(line):
 
 	matchPriority=RE_PRIORITY.search(line)
 	if matchPriority!=None:
-		priority=hi('!' * int(matchPriority.group(2)),CONFIG['hi_priority'])+' '
+		priority=hi(CONFIG['priority_char'] * int(matchPriority.group(2)),CONFIG['hi_priority'])+' '
 	else:
 		priority=''
 

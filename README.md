@@ -58,7 +58,7 @@ Basic task storage/layout:
 
 * plaintext
 * one task per line
-* priority like this: `(3)` (smaller number is higher priority)
+* priority like this: `(3)` (higher number is higher priority)
 * due date like this: `[10/31]`, `[10/31/2012]`, etc.
 * due date + time like this: `[11/22@10am]`, `[10/25@8:30pm]`, etc.
 * projects like this: `+project`
