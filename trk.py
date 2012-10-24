@@ -64,9 +64,21 @@ def printLine(line):
 
 def writeLines(filename,lines):
 	temp=open(filename,'a')
-	for i in lines:
-		print "Added %s %s" % (hi("[%s]" % lineid(i),CONFIG['hi_id']),i)
-		temp.write('%s\n' % i)
+	for line in lines:
+		#print "Added %s %s" % (hi("[%s]" % lineid(i),CONFIG['hi_id']),i)
+		preColorLine=line
+
+		line=RE_PROJECT.sub(hi('\g<0>',CONFIG['hi_project']),line)
+		line=RE_CONTEXT.sub(hi('\g<0>',CONFIG['hi_context']),line)
+		line=RE_PRIORITY.sub(hi('\g<0>',CONFIG['hi_priority']),line)
+		line=RE_DUE.sub(hi('\g<0>',CONFIG['hi_due']),line)
+
+		if line[0:2]=='x ':
+			line=hi("x",CONFIG['hi_done'])+" "+line[2:]
+		else:
+			line="  "+line
+		print "Added %s %s" % (hi("["+lineid(preColorLine)+"]",CONFIG['hi_id']),line)
+		temp.write('%s\n' % preColorLine)
 	temp.close()
 
 def markLines(filename,match=''):
