@@ -16,8 +16,41 @@ CONFIG['file']='.todo'
 
 RE_PROJECT=re.compile(r'\s(\+\w+)')
 RE_CONTEXT=re.compile(r'\s(\@\w+)')
-RE_PRIORITY=re.compile(r'(\(\d\))')
+RE_PRIORITY=re.compile(r'(\((\d)\))')
 RE_DUE=re.compile(r'(\[\d{1,2}/\d{1,2}(/\d{2,4})*(@\d{1,2}(:\d{1,2})*(am|pm)*)*\])')
+
+def linecmp(a,b):
+	# these look backwards to me but they work...
+	# if a > b, return -
+	# if a < b, return +
+	# if a = b, return 0
+
+	priorityMatchA = RE_PRIORITY.match(a)
+	priorityMatchB = RE_PRIORITY.match(b)
+	if priorityMatchA == None and priorityMatchB != None:
+		return 1
+	elif priorityMatchA != None and priorityMatchB == None:
+		return -1
+	elif priorityMatchA != None and priorityMatchB != None:
+		return int(priorityMatchB.group(2)) - int(priorityMatchA.group(2))
+	return cmp(a,b)
+
+
+class K(object):
+	def __init__(self,obj,*args):
+		self.obj=obj
+	def __lt__(self,other):
+		return linecmp(self.obj,other.obj) < 0
+	def __gt__(self,other):
+		return linecmp(self.obj,other.obj) > 0
+	def __eq__(self,other):
+		return linecmp(self.obj,other.obj) == 0
+	def __le__(self,other):
+		return linecmp(self.obj,other.obj) <= 0
+	def __ge__(self,other):
+		return linecmp(self.obj,other.obj) >= 0
+	def __ne__(self,other):
+		return linecmp(self.obj,other.obj) != 0
 
 def lineid(line):
 	line=line.strip()
@@ -36,7 +69,7 @@ def hi(string,color):
 def readLines(filename, match='',regex=None):
 	temp=open(filename,'r')
 	lines=[line for line in temp if line.strip()]
-	lines.sort()
+	lines.sort(key=K)
 	temp.close()
 
 	for line in lines:
@@ -84,7 +117,7 @@ def writeLines(filename,lines):
 def markLines(filename,match=''):
 	temp=open(filename,'r')
 	lines=[line for line in temp if line.strip()]
-	lines.sort()
+	lines.sort(key=K)
 	temp.close()
 	
 	temp=open(filename,'w')
