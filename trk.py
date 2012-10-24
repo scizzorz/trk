@@ -25,8 +25,8 @@ def linecmp(a,b):
 	# if a < b, return +
 	# if a = b, return 0
 
-	priorityMatchA = RE_PRIORITY.match(a)
-	priorityMatchB = RE_PRIORITY.match(b)
+	priorityMatchA = RE_PRIORITY.search(a)
+	priorityMatchB = RE_PRIORITY.search(b)
 	if priorityMatchA == None and priorityMatchB != None:
 		return 1
 	elif priorityMatchA != None and priorityMatchB == None:
@@ -74,13 +74,13 @@ def readLines(filename, match='',regex=None):
 
 	for line in lines:
 		if regex==True and re.search(match,line)!=None:
-			printLine(line)
+			print formatLine(line)
 		elif regex==False and re.search(match,line)==None:
-			printLine(line)
+			print formatLine(line)
 		elif match in line:
-			printLine(line)
+			print formatLine(line)
 
-def printLine(line):
+def formatLine(line):
 	line=line.strip()
 	preColorLine=line
 
@@ -93,25 +93,13 @@ def printLine(line):
 		line=hi("x",CONFIG['hi_done'])+" "+line[2:]
 	else:
 		line="  "+line
-	print "%s %s" % (hi("["+lineid(preColorLine)+"]",CONFIG['hi_id']),line)
+	return "%s %s" % (hi("["+lineid(preColorLine)+"]",CONFIG['hi_id']),line)
 
 def writeLines(filename,lines):
 	temp=open(filename,'a')
 	for line in lines:
-		#print "Added %s %s" % (hi("[%s]" % lineid(i),CONFIG['hi_id']),i)
-		preColorLine=line
-
-		line=RE_PROJECT.sub(hi('\g<0>',CONFIG['hi_project']),line)
-		line=RE_CONTEXT.sub(hi('\g<0>',CONFIG['hi_context']),line)
-		line=RE_PRIORITY.sub(hi('\g<0>',CONFIG['hi_priority']),line)
-		line=RE_DUE.sub(hi('\g<0>',CONFIG['hi_due']),line)
-
-		if line[0:2]=='x ':
-			line=hi("x",CONFIG['hi_done'])+" "+line[2:]
-		else:
-			line="  "+line
-		print "Added %s %s" % (hi("["+lineid(preColorLine)+"]",CONFIG['hi_id']),line)
-		temp.write('%s\n' % preColorLine)
+		print "Added %s" % formatLine(line)
+		temp.write('%s\n' % line)
 	temp.close()
 
 def markLines(filename,match=''):
