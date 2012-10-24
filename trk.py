@@ -51,18 +51,18 @@ Basic task storage/layout:
 	plaintext
 	one task per line
 	priority like this: (3) (smaller number is higher priority)
-	due date like this: d10/31, d10/31/2012, etc.
-	due date + time like this: d{date}@10am, d{date}@8:30pm, d{date}@8:30, d{date}@20, etc.
+	due date like this: [10/31], [10/31/2012], etc.
+	due date + time like this: [11/22@10am], [10/25@8:30pm], etc.
 	projects like this: +project
 	contexts like this: @context
 	finished like this: x task (the lowercase x *must* be the first character and *must* be followed by a space!)
 	ideally have it limit it to one priority / date / time per task, but we'll see about that
 	no limit to number of projects / contexts it can have
 	examples:
-		p2 d10/22@8pm submit lab 220.2 +cs220 @desktop
-		p2 finish work for Jim +msa @desktop
-		p1 d10/31 make Halloween costume
-		p1 d10/31 buy Halloween costume materials @shopping
+		(2) (10/22@8pm) submit lab 220.2 +cs220 @desktop
+		(2) finish work for Jim +msa @desktop
+		(1) (10/31) make Halloween costume
+		(1) (10/31) buy Halloween costume materials @shopping
 		work on +trk
 		call Mom @phone
 '''
@@ -80,7 +80,7 @@ CONFIG['hi_done']=8
 RE_PROJECT=re.compile(r'\s(\+[a-zA-Z0-9]+)')
 RE_CONTEXT=re.compile(r'\s(\@[a-zA-Z0-9]+)')
 RE_PRIORITY=re.compile(r'(\([0-9]+\))')
-RE_DUE=re.compile(r'(d\d{1,2}/\d{1,2}(/\d{2,4})*)(@\d{1,2}(:\d{1,2})*(am|pm)*)*')
+RE_DUE=re.compile(r'(\[\d{1,2}/\d{1,2}(/\d{2,4})*(@\d{1,2}(:\d{1,2})*(am|pm)*)*\])')
 
 def lineid(line):
 	line=line.strip()
@@ -97,7 +97,7 @@ def hi(string,color):
 		return "\033[%dm%s\033[0m" % (color+82,string)
 	
 def readLines(filename, match='',regex=None):
-	temp=open(filename,'r+')
+	temp=open(filename,'r')
 	lines=[line for line in temp if line.strip()]
 	lines.sort()
 	temp.close()
@@ -112,6 +112,8 @@ def readLines(filename, match='',regex=None):
 
 def printLine(line):
 	line=line.strip()
+	preColorLine=line
+
 	line=RE_PROJECT.sub(hi('\g<0>',CONFIG['hi_project']),line)
 	line=RE_CONTEXT.sub(hi('\g<0>',CONFIG['hi_context']),line)
 	line=RE_PRIORITY.sub(hi('\g<0>',CONFIG['hi_priority']),line)
@@ -121,7 +123,7 @@ def printLine(line):
 		line=hi("x",CONFIG['hi_done'])+" "+line[2:]
 	else:
 		line="  "+line
-	print "%s %s" % (hi("["+lineid(line)+"]",CONFIG['hi_id']),line)
+	print "%s %s" % (hi("["+lineid(preColorLine)+"]",CONFIG['hi_id']),line)
 
 def writeLines(filename,lines):
 	temp=open(filename,'a')
@@ -131,13 +133,20 @@ def writeLines(filename,lines):
 	temp.close()
 
 def markLines(filename,match=''):
-	for line in fileinput.input(filename,inplace=1):
+	temp=open(filename,'r')
+	lines=[line for line in temp if line.strip()]
+	lines.sort()
+	temp.close()
+	
+	temp=open(filename,'w')
+	for line in lines:
 		line=line.strip()
-		if match in lineid(line):
-			# now how do I print that it was actually marked...?
-			print line.replace(line,'x %s' % line)
+		if match in lineid(line) and line[0:2]!="x ":
+			print "Marking line %s done" % hi('['+lineid(line)+']',CONFIG['hi_id'])
+			temp.write('x %s\n' % line)
 		else:
-			print line
+			temp.write('%s\n' % line)
+	temp.close()
 
 def main(argv):
 	task='none'
@@ -146,7 +155,7 @@ def main(argv):
 	if len(argv)>1: # more than one argument
 		if argv[0] in ('x','finish','complete','hide'):
 			task=argv[1]
-			print "Mark '%s' complete / hidden" % task
+			print "Mark %s complete / hidden" % hi('['+task+']',CONFIG['hi_id'])
 			markLines(filename,task)
 		elif argv[0] in ('se','fi','search','find'):
 			task=argv[1]
