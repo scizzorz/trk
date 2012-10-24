@@ -35,8 +35,8 @@ List tasks assigned to a @context:
 	trk.py @context
 
 List tasks given a priority:
-(alias for trk.py search "p#")
-	trk.py p#
+(alias for trk.py search "(#)")
+	trk.py #
 
 Search tasks:
 	trk.py search|find|se|fi "search term"
@@ -50,7 +50,7 @@ Search tasks with exclusive regex (ie every task that *doesn't* match the patter
 Basic task storage/layout:
 	plaintext
 	one task per line
-	priority like this: p3
+	priority like this: (3) (smaller number is higher priority)
 	due date like this: d10/31, d10/31/2012, etc.
 	due date + time like this: d{date}@10am, d{date}@8:30pm, d{date}@8:30, d{date}@20, etc.
 	projects like this: +project
@@ -66,18 +66,43 @@ Basic task storage/layout:
 		work on +trk
 		call Mom @phone
 '''
+CONFIG=dict()
 
-ID_SIZE=4
+CONFIG['id_size']=4
+CONFIG['hi_on']=True
+CONFIG['hi_id']=4
+CONFIG['hi_project']=10
+CONFIG['hi_context']=11
+CONFIG['hi_priority']=9
+CONFIG['hi_due']=14
+CONFIG['hi_done']=8
+
+RE_PROJECT=re.compile(r'\s(\+[a-zA-Z0-9]+)')
+RE_CONTEXT=re.compile(r'\s(\@[a-zA-Z0-9]+)')
+RE_PRIORITY=re.compile(r'(\([0-9]+\))')
+RE_DUE=re.compile(r'(d\d{1,2}/\d{1,2}(/\d{2,4})*)(@\d{1,2}(:\d{1,2})*(am|pm)*)*')
 
 def lineid(line):
 	line=line.strip()
 	if line[0:2]=='x ':
 		line=line[2:]
-	return md5.new(line).hexdigest()[0:ID_SIZE]
+	return md5.new(line).hexdigest()[0:CONFIG['id_size']]
+
+def hi(string,color):
+	if(CONFIG['hi_on']!=True):
+		return string
+	elif color<8:
+		return "\033[%dm%s\033[0m" % (color+30,string)
+	else:
+		return "\033[%dm%s\033[0m" % (color+82,string)
 	
 def readLines(filename, match='',regex=None):
 	temp=open(filename,'r+')
-	for line in temp:
+	lines=[line for line in temp if line.strip()]
+	lines.sort()
+	temp.close()
+
+	for line in lines:
 		if regex==True and re.search(match,line)!=None:
 			printLine(line)
 		elif regex==False and re.search(match,line)==None:
@@ -87,13 +112,23 @@ def readLines(filename, match='',regex=None):
 
 def printLine(line):
 	line=line.strip()
-	print "[%s] %s" % (lineid(line), line)
+	line=RE_PROJECT.sub(hi('\g<0>',CONFIG['hi_project']),line)
+	line=RE_CONTEXT.sub(hi('\g<0>',CONFIG['hi_context']),line)
+	line=RE_PRIORITY.sub(hi('\g<0>',CONFIG['hi_priority']),line)
+	line=RE_DUE.sub(hi('\g<0>',CONFIG['hi_due']),line)
+
+	if line[0:2]=='x ':
+		line=hi("x",CONFIG['hi_done'])+" "+line[2:]
+	else:
+		line="  "+line
+	print "%s %s" % (hi("["+lineid(line)+"]",CONFIG['hi_id']),line)
 
 def writeLines(filename,lines):
 	temp=open(filename,'a')
 	for i in lines:
-		print "Added [%s] %s" % (lineid(i),i)
+		print "Added %s %s" % (hi("[%s]" % lineid(i),CONFIG['hi_id']),i)
 		temp.write('%s\n' % i)
+	temp.close()
 
 def markLines(filename,match=''):
 	for line in fileinput.input(filename,inplace=1):
@@ -131,14 +166,14 @@ def main(argv):
 	elif len(argv)==1: # only one argument, probably an alias
 		task=argv[0]
 		if task[0]=='@':
-			print "List context '%s'" % task[1:]
+			print "List %s" % hi(task,CONFIG['hi_context'])
 			readLines(filename,task)
 		elif task[0]=='+':
-			print "List project '%s'" % task[1:]
+			print "List %s" % hi(task,CONFIG['hi_project'])
 			readLines(filename,task)
-		elif task[0]=='p':
-			print "List priority '%s'" % task[1:]
-			readLines(filename,task)
+		elif task[0] in ('0','1','2','3','4','5','6','7','8','9'):
+			print "List %s" % hi('('+task+')',CONFIG['hi_priority'])
+			readLines(filename,'('+task+')')
 		elif argv[0] in ('x','completed','finished','hidden'):
 			print "List completed tasks"
 			readLines(filename,'^x ',True)
