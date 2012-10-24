@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import sys, getopt
+import sys, getopt, md5, re
 
 '''
 I'm not sure how these doc things work yet. I don't use Python much, but for right now I'm just
@@ -12,17 +12,36 @@ Complete a task:
 	trk.py finish|complete|delete|hide "some sort of ID / regex?"
 
 List tasks:
+(alias for trk.py xregex "^x ")
 	trk.py
 
+List all tasks:
+	trk.py all
+
+List completed tasks:
+(alias for trk.py regex "^x ")
+	trk.py x|completed|finished|hidden
+
 List tasks assigned to a +project:
+(just an alias for trk.py search "+project")
 	trk.py +project
 
 List tasks assigned to a @context:
+(just an alias for trk.py search "@context")
 	trk.py @context
 
 List tasks given a priority:
+(just an alias for trk.py search "p#")
 	trk.py p#
 
+Search tasks:
+	trk.py search|find "search term"
+
+Search tasks with regex:
+	trk.py regex|re "pattern"
+
+Search tasks with exclusive regex (ie every task that *doesn't* match the pattern):
+	trk.py xregex|xre "pattern"
 
 Basic task storage/layout:
 	plaintext
@@ -32,6 +51,7 @@ Basic task storage/layout:
 	due date + time like this: d{date}@10am, d{date}@8:30pm, d{date}@8:30, d{date}@20, etc.
 	projects like this: +project
 	contexts like this: @context
+	finished like this: x task (the lowercase x *must* be the first character and *must* be followed by a space!)
 	ideally have it limit it to one priority / date / time per task, but we'll see about that
 	no limit to number of projects / contexts it can have
 	examples:
@@ -43,10 +63,18 @@ Basic task storage/layout:
 		call Mom @phone
 '''
 
-def listLines(todoFile, match=''):
+def listLines(todoFile, match='',regex=False):
 	for line in todoFile:
-		if match in line:
-			print line
+		if regex==True and re.search(match,line)!=None:
+			printLine(line.strip())
+		elif regex==False and re.search(match,line)==None:
+			printLine(line.strip())
+		elif match in line:
+			printLine(line.strip())
+
+def printLine(line):
+	lineid = md5.new(line)
+	print "[%s] %s" % (lineid.hexdigest()[0:8], line)
 
 def main(argv):
 	task='none'
@@ -57,6 +85,24 @@ def main(argv):
 		if argv[0] in ('finish','complete','delete'):
 			task=argv[1]
 			print "Mark '%s' complete / hidden" % task
+		elif argv[0] in ('search','find'):
+			task=argv[1]
+			print "Search '%s'" % task
+			listLines(todoFile,task)
+		elif argv[0] in ('regex','re'):
+			task=argv[1]
+			print "RegEx search '%s'" % task
+			listLines(todoFile,task,True)
+		elif argv[0] in ('xregex','xre'):
+			task=argv[1]
+			print "Exclusive RegEx search '%s'" % task
+			listLines(todoFile,task,False)
+		elif argv[0] in ('x','completed','finished','hidden'):
+			print "List completed tasks"
+			listLines(todoFile,'^x ',True)
+		elif argv[0] in ('all'):
+			print "List all tasks"
+			listLines(todoFile)
 		else:
 			task=argv[0]
 			if task[0]=='@':
@@ -72,7 +118,7 @@ def main(argv):
 				print "Add '%s'" % task
 	else:
 		print 'List things'
-		listLines(todoFile)
+		listLines(todoFile,'^x ',False)
 
 if __name__=='__main__':
 	main(sys.argv[1:])
