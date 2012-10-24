@@ -4,7 +4,7 @@ A nice little command-line interface for organizing tasks and small notes.
 
 ## Usage
 
-Add a new task (alias for trk.py add "task"):
+Add a new task (alias for `trk.py add "task"`):
 
 	trk.py "task"
 
@@ -16,7 +16,7 @@ Complete a task:
 
 	trk.py x|finish|complete|hide "taskid"
 
-List tasks (alias for trk.py xregex "^x "):
+List tasks (alias for `trk.py xregex "^x "`):
 
 	trk.py
 
@@ -24,19 +24,19 @@ List all tasks:
 
 	trk.py all
 
-List completed tasks (alias for trk.py regex "^x "):
+List completed tasks (alias for `trk.py regex "^x "`):
 
 	trk.py x|completed|finished|hidden
 
-List tasks assigned to a +project (alias for trk.py search "+project"):
+List tasks assigned to a +project (alias for `trk.py search "+project"`):
 
 	trk.py +project
 
-List tasks assigned to a @context (alias for trk.py search "@context"):
+List tasks assigned to a @context (alias for `trk.py search "@context"`):
 
 	trk.py @context
 
-List tasks given a priority (alias for trk.py search "(#)"):
+List tasks given a priority (alias for `trk.py search "(#)"`):
 
 	trk.py #
 

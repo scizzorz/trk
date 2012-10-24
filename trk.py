@@ -14,9 +14,9 @@ CONFIG['hi_due']=14
 CONFIG['hi_done']=8
 CONFIG['file']='.todo'
 
-RE_PROJECT=re.compile(r'\s(\+[a-zA-Z0-9]+)')
-RE_CONTEXT=re.compile(r'\s(\@[a-zA-Z0-9]+)')
-RE_PRIORITY=re.compile(r'(\([0-9]+\))')
+RE_PROJECT=re.compile(r'\s(\+\w+)')
+RE_CONTEXT=re.compile(r'\s(\@\w+)')
+RE_PRIORITY=re.compile(r'(\(\d\))')
 RE_DUE=re.compile(r'(\[\d{1,2}/\d{1,2}(/\d{2,4})*(@\d{1,2}(:\d{1,2})*(am|pm)*)*\])')
 
 def lineid(line):
