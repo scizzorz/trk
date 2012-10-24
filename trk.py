@@ -16,7 +16,7 @@ CONFIG['file']='.todo'
 
 RE_PROJECT=re.compile(r'\s(\+\w+)')
 RE_CONTEXT=re.compile(r'\s(\@\w+)')
-RE_PRIORITY=re.compile(r'(\((\d)\))')
+RE_PRIORITY=re.compile(r'\s*(\((\d)\))\s*')
 RE_DUE=re.compile(r'(\[\d{1,2}/\d{1,2}(/\d{2,4})*(@\d{1,2}(:\d{1,2})*(am|pm)*)*\])')
 
 def linecmp(a,b):
@@ -84,10 +84,19 @@ def formatLine(line):
 	line=line.strip()
 	preColorLine=line
 
+	matchPriority=RE_PRIORITY.search(line)
+	if matchPriority!=None:
+		priority=hi('!' * int(matchPriority.group(2)),CONFIG['hi_priority'])+' '
+	else:
+		priority=''
+
+
 	line=RE_PROJECT.sub(hi('\g<0>',CONFIG['hi_project']),line)
 	line=RE_CONTEXT.sub(hi('\g<0>',CONFIG['hi_context']),line)
-	line=RE_PRIORITY.sub(hi('\g<0>',CONFIG['hi_priority']),line)
+	#line=RE_PRIORITY.sub(hi('\g<0>',CONFIG['hi_priority']),line)
+	line=RE_PRIORITY.sub('',line)
 	line=RE_DUE.sub(hi('\g<0>',CONFIG['hi_due']),line)
+	line=priority+line
 
 	if line[0:2]=='x ':
 		line=hi("x",CONFIG['hi_done'])+" "+line[2:]
