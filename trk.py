@@ -197,11 +197,10 @@ def formatLine(line):
 	return "%s %s" % (hi("["+lineid(preColorLine)+"]",CONFIG['hi_id']),line)
 
 # write lines to the file
-def writeLines(filename,lines):
+def writeLine(filename,line):
 	temp=open(filename,'a')
-	for line in lines:
-		print "Added %s" % formatLine(line)
-		temp.write('%s\n' % line)
+	print "Added %s" % formatLine(line)
+	temp.write('%s\n' % line)
 	temp.close()
 
 # mark lines as complete
@@ -219,13 +218,13 @@ def markLines(filename,match='',edit=None):
 		# if we're editing, we don't care if it's done or not
 		if edit and match in lineid(line):
 			line=editLine(line)
-			print "Saving new line %s" % formatLine(line)
 			temp.write('%s\n' % line)
+			print "Saved new line %s" % formatLine(line)
 
 		# if we're just marking it, we need to make sure it's not already marked
 		elif match in lineid(line) and RE_DONE.search(line)==None:
-			print "Marking line %s done" % hi('['+lineid(line)+']',CONFIG['hi_id'])
 			temp.write('x %s\n' % line)
+			print "Marked line %s done" % hi('['+lineid(line)+']',CONFIG['hi_id'])
 
 		# none
 		else:
@@ -263,61 +262,50 @@ def main(argv):
 
 	if len(argv)>1: # more than one argument
 		if argv[0] in ('x','finish','complete','hide'):
-			task=argv[1]
-			print "Mark %s complete / hidden" % hi('['+task+']',CONFIG['hi_id'])
-			markLines(filename,task)
+			for task in argv[1:]:
+				markLines(filename,task)
 
 		elif argv[0] in ('edit','ed'):
-			task=argv[1]
-			markLines(filename,task,True)
+			for task in argv[1:]:
+				markLines(filename,task,True)
 
 		elif argv[0] in ('se','fi','search','find'):
 			task=argv[1]
-			print "Search '%s'" % task
 			readLines(filename,task)
 
 		elif argv[0] in ('regex','re'):
 			task=argv[1]
-			print "RegEx search '%s'" % task
 			readLines(filename,task,True)
 
 		elif argv[0] in ('xregex','xre'):
 			task=argv[1]
-			print "Exclusive RegEx search '%s'" % task
 			readLines(filename,task,False)
 
 		elif argv[0] in ('add'):
-			print "Batch add %s" % argv[1:]
-			writeLines(filename,argv[1:])
+			for task in argv[1:]:
+				writeLine(filename,task)
 
 	elif len(argv)==1: # only one argument, probably an alias
 		task=argv[0]
 		if task[0]=='@' and ' ' not in task:
-			print "List %s" % hi(task,CONFIG['hi_context'])
 			readLines(filename,task)
 
 		elif task[0]=='+' and ' ' not in task:
-			print "List %s" % hi(task,CONFIG['hi_project'])
 			readLines(filename,task)
 
 		elif task[0] in ('0','1','2','3','4','5','6','7','8','9'):
-			print "List %s" % hi('('+task+')',CONFIG['hi_priority'])
 			readLines(filename,'('+task+')')
 
 		elif argv[0] in ('x','completed','finished','hidden'):
-			print "List completed tasks"
 			readLines(filename,'^x\s*',True)
 
 		elif argv[0] in ('all'):
-			print "List all tasks"
 			readLines(filename)
 
 		else: # no alias
-			print "Add '%s'" % task
-			writeLines(filename,argv)
+			writeLine(filename,task)
 
 	else: # no arguments
-		print 'List incomplete tasks'
 		readLines(filename,'^x\s*',False)
 
 if __name__=='__main__':
