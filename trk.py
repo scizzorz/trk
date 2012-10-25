@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import sys, getopt, md5, re, fileinput
+import sys, getopt, md5, re, time
 from os.path import expanduser
 
 CONFIG=dict()
@@ -18,7 +18,7 @@ CONFIG['priority_char']='!'
 RE_PROJECT=re.compile(r'(^|\s)(\+\w+)')
 RE_CONTEXT=re.compile(r'(^|\s)(\@\w+)')
 RE_PRIORITY=re.compile(r'\s*(\((\d)\))\s*')
-RE_DUE=re.compile(r'(\[\d{1,2}/\d{1,2}(/\d{2,4})*(@\d{1,2}(:\d{1,2})*(am|pm)*)*\])')
+RE_DUE=re.compile(r'(\[(\d{1,2})/(\d{1,2})(/(\d{2,4}))*(@(\d{1,2})(:(\d{1,2}))*(am|pm)*)*\])')
 RE_DONE=re.compile(r'(^x\s*)')
 
 def linecmp(a,b):
@@ -41,9 +41,56 @@ def linecmp(a,b):
 	elif priorityMatchA != None and priorityMatchB == None:
 		return -1
 	elif priorityMatchA != None and priorityMatchB != None:
-		return int(priorityMatchB.group(2)) - int(priorityMatchA.group(2))
-	return cmp(a,b)
+		ret=int(priorityMatchB.group(2)) - int(priorityMatchA.group(2))
+		if ret!=0:
+			return ret
 
+	dateMatchA = RE_DUE.search(a)
+	dateMatchB = RE_DUE.search(b)
+	if dateMatchA != None:
+		monthA=dateMatchA.group(2)
+		dayA=dateMatchA.group(3)
+		yearA=dateMatchA.group(5) or time.strftime("%Y",time.gmtime())
+		if len(yearA)==3:
+			yearA=time.strftime("%Y",time.gmtime())
+		elif len(yearA)==2:
+			yearA="20"+yearA
+		hourA=dateMatchA.group(7) or "12"
+		minuteA=dateMatchA.group(9) or "00"
+		pamA=dateMatchA.group(10) or "AM"
+		if pamA=='am':
+			pamA='AM'
+		elif pamA=='pm':
+			pamA='PM'
+		timeA=time.mktime(time.strptime("%s %s %s %s %s %s" % (monthA,dayA,yearA,hourA,minuteA,pamA),"%m %d %Y %I %M %p"))
+
+	if dateMatchB != None:
+		monthB=dateMatchB.group(2)
+		dayB=dateMatchB.group(3)
+		yearB=dateMatchB.group(5) or time.strftime("%Y",time.gmtime())
+		if len(yearB)==3:
+			yearB=time.strftime("%Y",time.gmtime())
+		elif len(yearB)==2:
+			yearB="20"+yearB
+		hourB=dateMatchB.group(7) or "12"
+		minuteB=dateMatchB.group(9) or "00"
+		pamB=dateMatchB.group(10) or "AM"
+		if pamB=='am':
+			pamB='AM'
+		elif pamB=='pm':
+			pamB='PM'
+		timeB=time.mktime(time.strptime("%s %s %s %s %s %s" % (monthB,dayB,yearB,hourB,minuteB,pamB),"%m %d %Y %I %M %p"))
+	
+	if dateMatchA == None and dateMatchB != None:
+		return 1
+	elif dateMatchA != None and dateMatchB == None:
+		return -1
+	elif dateMatchA != None and dateMatchB != None:
+		ret=timeB - timeA
+		if ret!=0:
+			return -ret/abs(ret)
+
+	return cmp(a,b)
 
 class K(object):
 	def __init__(self,obj,*args):
