@@ -15,8 +15,8 @@ CONFIG['hi_done']=8
 CONFIG['file']='.todo'
 CONFIG['priority_char']='!'
 
-RE_PROJECT=re.compile(r'\s(\+\w+)')
-RE_CONTEXT=re.compile(r'\s(\@\w+)')
+RE_PROJECT=re.compile(r'(^|\s)(\+\w+)')
+RE_CONTEXT=re.compile(r'(^|\s)(\@\w+)')
 RE_PRIORITY=re.compile(r'\s*(\((\d)\))\s*')
 RE_DUE=re.compile(r'(\[\d{1,2}/\d{1,2}(/\d{2,4})*(@\d{1,2}(:\d{1,2})*(am|pm)*)*\])')
 RE_DONE=re.compile(r'(^x\s*)')
@@ -99,16 +99,16 @@ def formatLine(line):
 		priority=''
 
 
-	line=RE_PROJECT.sub(hi('\g<0>',CONFIG['hi_project']),line)
-	line=RE_CONTEXT.sub(hi('\g<0>',CONFIG['hi_context']),line)
+	line=RE_PROJECT.sub('\g<1>'+hi('\g<2>',CONFIG['hi_project']),line)
+	line=RE_CONTEXT.sub('\g<1>'+hi('\g<2>',CONFIG['hi_context']),line)
 	line=RE_PRIORITY.sub('',line)
 	line=RE_DUE.sub(hi('\g<0>',CONFIG['hi_due']),line)
 
 	if RE_DONE.search(line)!=None:
 		line=RE_DONE.sub('',line)
-		line=hi("x",CONFIG['hi_done'])+" "+priority+line
+		line=hi("x",CONFIG['hi_done'])+" "+priority+line.strip()
 	else:
-		line="  "+priority+line
+		line="  "+priority+line.strip()
 
 	return "%s %s" % (hi("["+lineid(preColorLine)+"]",CONFIG['hi_id']),line)
 
