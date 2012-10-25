@@ -52,6 +52,10 @@ Search tasks with exclusive regex (ie every task that *doesn't* match the patter
 
 	trk.py xregex|xre "pattern"
 
+Edit a task:
+
+	trk.py edit|ed "taskid"
+
 ## Basic roadmap
 
 Basic task storage/layout:

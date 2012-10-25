@@ -167,7 +167,7 @@ def writeLines(filename,lines):
 		temp.write('%s\n' % line)
 	temp.close()
 
-def markLines(filename,match=''):
+def markLines(filename,match='',edit=None):
 	temp=open(filename,'r')
 	lines=[line for line in temp if line.strip()]
 	lines.sort(key=K)
@@ -176,12 +176,36 @@ def markLines(filename,match=''):
 	temp=open(filename,'w')
 	for line in lines:
 		line=line.strip()
-		if match in lineid(line) and RE_DONE.search(line)==None:
+		if edit and match in lineid(line):
+			line=editLine(line)
+			print "Saving new line %s" % formatLine(line)
+			temp.write('%s\n' % line)
+		elif match in lineid(line) and RE_DONE.search(line)==None:
 			print "Marking line %s done" % hi('['+lineid(line)+']',CONFIG['hi_id'])
 			temp.write('x %s\n' % line)
 		else:
 			temp.write('%s\n' % line)
 	temp.close()
+
+def editLine(line):
+	# this code is kinda borrowed from Mercurial...
+	t=''
+
+	(fd, name) = tempfile.mkstemp(prefix='trk-editor-',suffix='.txt',text=True)
+	try:
+		f=os.fdopen(fd,'w')
+		f.write(line)
+		f.close()
+
+		os.system("%s \"%s\"" % (CONFIG['editor'],name))
+
+		f=open(name)
+		t=f.read()
+		f.close()
+	finally:
+		os.unlink(name)
+	
+	return t
 
 def main(argv):
 	task='none'
@@ -192,57 +216,56 @@ def main(argv):
 			task=argv[1]
 			print "Mark %s complete / hidden" % hi('['+task+']',CONFIG['hi_id'])
 			markLines(filename,task)
+
 		elif argv[0] in ('edit','ed'):
-			# this code is kinda borrowed from Mercurial
+			task=argv[1]
+			markLines(filename,task,True)
 
-			(fd, name) = tempfile.mkstemp(prefix='trk-editor-',suffix='.txt',text=True)
-			try:
-				f=os.fdopen(fd,'w')
-				f.write('this is the text edit')
-				f.close()
-
-				os.system("%s \"%s\"" % (CONFIG['editor'],name))
-
-				f=open(name)
-				print f.read()
-				f.close()
-			finally:
-				os.unlink(name)
 		elif argv[0] in ('se','fi','search','find'):
 			task=argv[1]
 			print "Search '%s'" % task
 			readLines(filename,task)
+
 		elif argv[0] in ('regex','re'):
 			task=argv[1]
 			print "RegEx search '%s'" % task
 			readLines(filename,task,True)
+
 		elif argv[0] in ('xregex','xre'):
 			task=argv[1]
 			print "Exclusive RegEx search '%s'" % task
 			readLines(filename,task,False)
+
 		elif argv[0] in ('add'):
 			print "Batch add %s" % argv[1:]
 			writeLines(filename,argv[1:])
+
 	elif len(argv)==1: # only one argument, probably an alias
 		task=argv[0]
 		if task[0]=='@' and ' ' not in task:
 			print "List %s" % hi(task,CONFIG['hi_context'])
 			readLines(filename,task)
+
 		elif task[0]=='+' and ' ' not in task:
 			print "List %s" % hi(task,CONFIG['hi_project'])
 			readLines(filename,task)
+
 		elif task[0] in ('0','1','2','3','4','5','6','7','8','9'):
 			print "List %s" % hi('('+task+')',CONFIG['hi_priority'])
 			readLines(filename,'('+task+')')
+
 		elif argv[0] in ('x','completed','finished','hidden'):
 			print "List completed tasks"
 			readLines(filename,'^x\s*',True)
+
 		elif argv[0] in ('all'):
 			print "List all tasks"
 			readLines(filename)
+
 		else: # no alias
 			print "Add '%s'" % task
 			writeLines(filename,argv)
+
 	else: # no arguments
 		print 'List incomplete tasks'
 		readLines(filename,'^x\s*',False)
