@@ -128,7 +128,7 @@ def markLines(filename,match=''):
 	temp=open(filename,'w')
 	for line in lines:
 		line=line.strip()
-		if match in lineid(line) and RE_DONE.search(line)!=None:
+		if match in lineid(line) and RE_DONE.search(line)==None:
 			print "Marking line %s done" % hi('['+lineid(line)+']',CONFIG['hi_id'])
 			temp.write('x %s\n' % line)
 		else:
