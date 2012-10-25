@@ -1,5 +1,5 @@
 #!/usr/bin/python
-import sys, getopt, md5, re, time
+import sys, os, getopt, md5, re, time, tempfile
 from os.path import expanduser
 
 CONFIG=dict()
@@ -14,6 +14,7 @@ CONFIG['hi_due']=14
 CONFIG['hi_done']=8
 CONFIG['file']='.todo'
 CONFIG['priority_char']='!'
+CONFIG['editor']='vim'
 
 RE_PROJECT=re.compile(r'(^|\s)(\+\w+)')
 RE_CONTEXT=re.compile(r'(^|\s)(\@\w+)')
@@ -191,6 +192,22 @@ def main(argv):
 			task=argv[1]
 			print "Mark %s complete / hidden" % hi('['+task+']',CONFIG['hi_id'])
 			markLines(filename,task)
+		elif argv[0] in ('edit','ed'):
+			# this code is kinda borrowed from Mercurial
+
+			(fd, name) = tempfile.mkstemp(prefix='trk-editor-',suffix='.txt',text=True)
+			try:
+				f=os.fdopen(fd,'w')
+				f.write('this is the text edit')
+				f.close()
+
+				os.system("%s \"%s\"" % (CONFIG['editor'],name))
+
+				f=open(name)
+				print f.read()
+				f.close()
+			finally:
+				os.unlink(name)
 		elif argv[0] in ('se','fi','search','find'):
 			task=argv[1]
 			print "Search '%s'" % task
