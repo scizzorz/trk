@@ -19,12 +19,20 @@ RE_PROJECT=re.compile(r'\s(\+\w+)')
 RE_CONTEXT=re.compile(r'\s(\@\w+)')
 RE_PRIORITY=re.compile(r'\s*(\((\d)\))\s*')
 RE_DUE=re.compile(r'(\[\d{1,2}/\d{1,2}(/\d{2,4})*(@\d{1,2}(:\d{1,2})*(am|pm)*)*\])')
+RE_DONE=re.compile(r'(^x\s*)')
 
 def linecmp(a,b):
 	# these look backwards to me but they work...
 	# if a > b, return -
 	# if a < b, return +
 	# if a = b, return 0
+
+	doneMatchA = RE_DONE.search(a)
+	doneMatchB = RE_DONE.search(b)
+	if doneMatchA!=None and doneMatchB==None:
+		return 1
+	elif doneMatchA==None and doneMatchB!=None:
+		return -1
 
 	priorityMatchA = RE_PRIORITY.search(a)
 	priorityMatchB = RE_PRIORITY.search(b)
@@ -55,8 +63,7 @@ class K(object):
 
 def lineid(line):
 	line=line.strip()
-	if line[0:2]=='x ':
-		line=line[2:]
+	line=RE_DONE.sub('',line)
 	return md5.new(line).hexdigest()[0:CONFIG['id_size']]
 
 def hi(string,color):
@@ -94,15 +101,15 @@ def formatLine(line):
 
 	line=RE_PROJECT.sub(hi('\g<0>',CONFIG['hi_project']),line)
 	line=RE_CONTEXT.sub(hi('\g<0>',CONFIG['hi_context']),line)
-	#line=RE_PRIORITY.sub(hi('\g<0>',CONFIG['hi_priority']),line)
 	line=RE_PRIORITY.sub('',line)
 	line=RE_DUE.sub(hi('\g<0>',CONFIG['hi_due']),line)
-	line=priority+line
 
-	if line[0:2]=='x ':
-		line=hi("x",CONFIG['hi_done'])+" "+line[2:]
+	if RE_DONE.search(line)!=None:
+		line=RE_DONE.sub('',line)
+		line=hi("x",CONFIG['hi_done'])+" "+priority+line
 	else:
-		line="  "+line
+		line="  "+priority+line
+
 	return "%s %s" % (hi("["+lineid(preColorLine)+"]",CONFIG['hi_id']),line)
 
 def writeLines(filename,lines):
@@ -121,7 +128,7 @@ def markLines(filename,match=''):
 	temp=open(filename,'w')
 	for line in lines:
 		line=line.strip()
-		if match in lineid(line) and line[0:2]!="x ":
+		if match in lineid(line) and RE_DONE.search(line)!=None:
 			print "Marking line %s done" % hi('['+lineid(line)+']',CONFIG['hi_id'])
 			temp.write('x %s\n' % line)
 		else:
@@ -165,7 +172,7 @@ def main(argv):
 			readLines(filename,'('+task+')')
 		elif argv[0] in ('x','completed','finished','hidden'):
 			print "List completed tasks"
-			readLines(filename,'^x ',True)
+			readLines(filename,'^x\s*',True)
 		elif argv[0] in ('all'):
 			print "List all tasks"
 			readLines(filename)
@@ -174,7 +181,7 @@ def main(argv):
 			writeLines(filename,argv)
 	else: # no arguments
 		print 'List incomplete tasks'
-		readLines(filename,'^x ',False)
+		readLines(filename,'^x\s*',False)
 
 if __name__=='__main__':
 	main(sys.argv[1:])

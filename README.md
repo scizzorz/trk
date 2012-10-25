@@ -16,7 +16,7 @@ Complete a task:
 
 	trk.py x|finish|complete|hide "taskid"
 
-List tasks (alias for `trk.py xregex "^x "`):
+List tasks (alias for `trk.py xregex "^x\s*"`):
 
 	trk.py
 
@@ -24,7 +24,7 @@ List all tasks:
 
 	trk.py all
 
-List completed tasks (alias for `trk.py regex "^x "`):
+List completed tasks (alias for `trk.py regex "^x\s*"`):
 
 	trk.py x|completed|finished|hidden
 
