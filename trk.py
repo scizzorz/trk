@@ -225,10 +225,10 @@ def main(argv):
 			writeLines(filename,argv[1:])
 	elif len(argv)==1: # only one argument, probably an alias
 		task=argv[0]
-		if task[0]=='@':
+		if task[0]=='@' and ' ' not in task:
 			print "List %s" % hi(task,CONFIG['hi_context'])
 			readLines(filename,task)
-		elif task[0]=='+':
+		elif task[0]=='+' and ' ' not in task:
 			print "List %s" % hi(task,CONFIG['hi_project'])
 			readLines(filename,task)
 		elif task[0] in ('0','1','2','3','4','5','6','7','8','9'):
