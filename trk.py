@@ -288,25 +288,25 @@ def main(argv):
 	elif len(argv)==1: # only one argument, probably an alias
 		task=argv[0]
 		if task[0]=='@' and ' ' not in task:
-			readLines(filename,task)
+			main(['search',task])
 
 		elif task[0]=='+' and ' ' not in task:
-			readLines(filename,task)
+			main(['search',task])
 
 		elif task[0] in ('0','1','2','3','4','5','6','7','8','9'):
-			readLines(filename,'('+task+')')
+			main(["search",'('+task+')'])
 
 		elif argv[0] in ('x','completed','finished','hidden'):
-			readLines(filename,'^x\s*',True)
+			main(['regex','^x\s*'])
 
 		elif argv[0] in ('all'):
-			readLines(filename)
+			main(['search',''])
 
 		else: # no alias
 			writeLine(filename,task)
 
 	else: # no arguments
-		readLines(filename,'^x\s*',False)
+		main(['xregex','^x\s*'])
 
 if __name__=='__main__':
 	main(sys.argv[1:])
