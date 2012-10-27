@@ -58,11 +58,49 @@ Search tasks with an `eval`:
 
 	trk.py eval|ev|es "eval"
 
-
-
 Edit a task:
 
 	trk.py edit|ed "taskid"
+
+## Settings
+
+`trk` reads settings from a `.trkrc` in the user's home directory. So far, here are all the valid options and their defaults:
+
+`id_size = 4`  
+the string length for each task's unique identifier
+
+`hi_style = xterm`  
+the type of highlighting format `trk` should use. `xterm` and `conky` will print appropriate color escape codes, while any other value with turn off highlighting
+
+`hi_id = 4`  
+the palette color for highlighting task identifiers
+
+`hi_project = 10` 
+...task projects
+
+`hi_context 11`  
+...task contexts
+
+`hi_priority = 9`  
+...task priorities
+
+`hi_due = 14`  
+...task due dates
+
+`hi_done = 8`  
+...task completion checkmarks
+
+`file = .todo`  
+the file used to store all your tasks
+
+`priority_char = !`  
+the character used to represent priority
+
+`editor = vim`  
+the text editor used to edit tasks
+
+`alias_XXX = YYY`  
+allows you to create custom aliases. Expands `trk.py XXX` into `trk.py eval YYY`. Can also use arguments, eg `alias_r = re('%s')` will cause `trk.py r ^x` to expand to `trk.py eval "re('^x')"`
 
 ## Basic roadmap
 

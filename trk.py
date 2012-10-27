@@ -37,6 +37,8 @@ RE_PRIORITY=re.compile(r'\s*(\((\d)\))\s*')
 RE_DUE=re.compile(r'(\[(\d{1,2})/(\d{1,2})(/(\d{2,4}))*(@(\d{1,2})(:(\d{1,2}))*(am|pm)*)*\])')
 RE_DONE=re.compile(r'(^x\s*)')
 
+RE_SETTING=re.compile(r'(\w+)\s*\=\s*(.*)')
+
 def linecmp(a,b):
 	# these look backwards to me but they work...
 	# if a > b, return -
@@ -142,14 +144,22 @@ def lineid(line):
 
 # highlights a string with the given color
 def hi(string,color):
-	if CONFIG['hi_style']==None:
-		return string
-	elif CONFIG['hi_style']=='conky':
+	color = int(color)
+
+	# conky highlighting
+	if CONFIG['hi_style']=='conky':
 		return "${color%d}%s${color}" % (color%9,string)
-	elif color<8:
-		return "\033[%dm%s\033[0m" % (color+30,string)
+
+	# xterm highlighting
+	elif CONFIG['hi_style']=='xterm':
+		if color<8:
+			return "\033[%dm%s\033[0m" % (color+30,string)
+		else:
+			return "\033[%dm%s\033[0m" % (color+82,string)
+
+	# none
 	else:
-		return "\033[%dm%s\033[0m" % (color+82,string)
+		return string
 	
 # read tasks
 def readLines(filename, match='',regex=None):
@@ -276,13 +286,32 @@ def editLine(line):
 	# return new text
 	return t
 
+def settings():
+	# get filename and open it
+	settingsname="%s/%s" % (expanduser("~"),".trkrc")
+	lines = open(settingsname,'r')
+
+	# loop through it
+	for line in lines:
+		# if it matches our settings regex
+		match=RE_SETTING.search(line)
+		
+		# set the configuration option!
+		if match!=None:
+			CONFIG[match.group(1)] = match.group(2)
+
+
 def main(argv):
 	task='none'
 	filename="%s/%s" % (expanduser("~"),CONFIG['file'])
 
 	if len(argv)>1: # more than one argument
 		cmd = argv[0]
-		if cmd in ('x','finish','complete','hide'):
+		if ('alias_'+cmd) in CONFIG:
+			formatted = CONFIG['alias_'+cmd] % tuple(argv[1:])
+			main(['eval',formatted])
+
+		elif cmd in ('x','finish','complete','hide'):
 			for task in argv[1:]:
 				markLines(filename,task)
 
@@ -312,7 +341,10 @@ def main(argv):
 
 	elif len(argv)==1: # only one argument, probably an alias
 		task=argv[0]
-		if task[0]=='@' and ' ' not in task:
+		if ('alias_'+task) in CONFIG:
+			main(['eval',CONFIG['alias_'+task]])
+
+		elif task[0]=='@' and ' ' not in task:
 			main(['eval','se("%s") and xre("^x\s*")' % task])
 
 		elif task[0]=='+' and ' ' not in task:
@@ -334,4 +366,5 @@ def main(argv):
 		main(['xregex','^x\s*'])
 
 if __name__=='__main__':
+	settings()
 	main(sys.argv[1:])
