@@ -82,11 +82,9 @@ def linecmp(a,b):
 			yearA="20"+yearA
 		hourA=dateMatchA.group(7) or "12"
 		minuteA=dateMatchA.group(9) or "00"
-		pamA=dateMatchA.group(10) or "AM"
-		if pamA=='am':
-			pamA='AM'
-		elif pamA=='pm':
-			pamA='PM'
+		pamA = dateMatchA.group(10) or 'am'
+		pamA = pamA.upper()
+
 		timeA=time.mktime(time.strptime("%s %s %s %s %s %s" % (monthA,dayA,yearA,hourA,minuteA,pamA),"%m %d %Y %I %M %p"))
 
 	# convert dateMatchB into a sortable Unix time
@@ -100,11 +98,9 @@ def linecmp(a,b):
 			yearB="20"+yearB
 		hourB=dateMatchB.group(7) or "12"
 		minuteB=dateMatchB.group(9) or "00"
-		pamB=dateMatchB.group(10) or "AM"
-		if pamB=='am':
-			pamB='AM'
-		elif pamB=='pm':
-			pamB='PM'
+		pamB = dateMatchB.group(10) or 'am'
+		pamB = pamB.upper()
+
 		timeB=time.mktime(time.strptime("%s %s %s %s %s %s" % (monthB,dayB,yearB,hourB,minuteB,pamB),"%m %d %Y %I %M %p"))
 	
 	# sort dateMatches
@@ -159,14 +155,27 @@ def readLines(filename, match='',regex=None):
 	lines=[line for line in temp if line.strip()]
 	lines.sort(key=K)
 	temp.close()
+	if regex=='eval':
+		match=match.replace('se(','eval_s(line,')
+		match=match.replace('xre(','eval_x(line,')
+		match=match.replace('re(','eval_r(line,')
 
 	for line in lines:
-		if regex==True and re.search(match,line)!=None:
+		if regex=='eval' and eval(match):
 			print formatLine(line)
-		elif regex==False and re.search(match,line)==None:
+		if regex=="re" and re.search(match,line)!=None:
+			print formatLine(line)
+		elif regex=="xre" and re.search(match,line)==None:
 			print formatLine(line)
 		elif match in line:
 			print formatLine(line)
+
+def eval_s(line,match=''):
+	return match in line
+def eval_r(line,match=''):
+	return re.search(match,line)!=None
+def eval_x(line,match=''):
+	return re.search(match,line)==None
 
 # format a line for printing
 def formatLine(line):
@@ -261,29 +270,34 @@ def main(argv):
 	filename="%s/%s" % (expanduser("~"),CONFIG['file'])
 
 	if len(argv)>1: # more than one argument
-		if argv[0] in ('x','finish','complete','hide'):
+		cmd = argv[0]
+		if cmd in ('x','finish','complete','hide'):
 			for task in argv[1:]:
 				markLines(filename,task)
 
-		elif argv[0] in ('edit','ed'):
+		elif cmd in ('edit','ed'):
 			for task in argv[1:]:
 				markLines(filename,task,True)
 
-		elif argv[0] in ('se','fi','search','find'):
+		elif cmd in ('se','fi','search','find'):
 			task=argv[1]
 			readLines(filename,task)
 
-		elif argv[0] in ('regex','re'):
+		elif cmd in ('regex','re'):
 			task=argv[1]
-			readLines(filename,task,True)
+			readLines(filename,task,'re')
 
-		elif argv[0] in ('xregex','xre'):
+		elif cmd in ('xregex','xre'):
 			task=argv[1]
-			readLines(filename,task,False)
+			readLines(filename,task,'xre')
 
-		elif argv[0] in ('add'):
+		elif cmd in ('add'):
 			for task in argv[1:]:
 				writeLine(filename,task)
+
+		elif cmd in ('eval','es'):
+			task=argv[1]
+			readLines(filename,task,'eval')
 
 	elif len(argv)==1: # only one argument, probably an alias
 		task=argv[0]
