@@ -52,9 +52,9 @@ Search tasks with exclusive regex (ie every task that *doesn't* match the patter
 
 	trk.py xregex|xre "pattern"
 
-Search tasks with an `eval`:
+Search tasks with an `eval`:  
 *(`se(string)`, `re(string)`, and `xre(string)` are shorthand for their respective `trk` commands)*  
-*(eg `trk.py eval "se('text')"` is the same as `trk.py search text`)*  
+*(eg `trk.py eval "se('text')"` is the same as `trk.py search text`)*
 
 	trk.py eval|ev|es "eval"
 
