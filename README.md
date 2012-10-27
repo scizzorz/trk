@@ -75,7 +75,7 @@ the type of highlighting format `trk` should use. `xterm` and `conky` will print
 `hi_id = 4`  
 the palette color for highlighting task identifiers
 
-`hi_project = 10` 
+`hi_project = 10`  
 ...task projects
 
 `hi_context 11`  
