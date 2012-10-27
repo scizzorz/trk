@@ -295,20 +295,20 @@ def main(argv):
 			for task in argv[1:]:
 				writeLine(filename,task)
 
-		elif cmd in ('eval','es'):
+		elif cmd in ('eval','es','ev'):
 			task=argv[1]
 			readLines(filename,task,'eval')
 
 	elif len(argv)==1: # only one argument, probably an alias
 		task=argv[0]
 		if task[0]=='@' and ' ' not in task:
-			main(['search',task])
+			main(['eval','se("%s") and xre("^x\s*")' % task])
 
 		elif task[0]=='+' and ' ' not in task:
-			main(['search',task])
+			main(['eval','se("%s") and xre("^x\s*")' % task])
 
 		elif task[0] in ('0','1','2','3','4','5','6','7','8','9'):
-			main(["search",'('+task+')'])
+			main(['eval','se("(%s)") and xre("^x\s*")' % task])
 
 		elif argv[0] in ('x','completed','finished','hidden'):
 			main(['regex','^x\s*'])

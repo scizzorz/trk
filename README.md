@@ -28,15 +28,15 @@ List completed tasks (alias for `trk.py regex "^x\s*"`):
 
 	trk.py x|completed|finished|hidden
 
-List tasks assigned to a +project (alias for `trk.py search "+project"`):
+List tasks assigned to a +project (alias for `trk.py eval "se('+project') and xre('^x\s*')"`):
 
 	trk.py +project
 
-List tasks assigned to a @context (alias for `trk.py search "@context"`):
+List tasks assigned to a @context (alias for `trk.py eval "se('@context') and xre('^x\s*')"`):
 
 	trk.py @context
 
-List tasks given a priority (alias for `trk.py search "(#)"`):
+List tasks given a priority (alias for `trk.py eval "se('(#)') and xre('^x\s*')"`):
 
 	trk.py #
 
@@ -51,6 +51,14 @@ Search tasks with regex:
 Search tasks with exclusive regex (ie every task that *doesn't* match the pattern):
 
 	trk.py xregex|xre "pattern"
+
+Search tasks with an `eval`:
+*(`se(string)`, `re(string)`, and `xre(string)` are shorthand for their respective `trk` commands)*
+*(eg `trk.py eval "se('text')"` is the same as `trk.py search text`)*
+
+	trk.py eval|ev|es "eval"
+
+
 
 Edit a task:
 
