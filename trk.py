@@ -151,10 +151,13 @@ def hi(string,color):
 	
 # read tasks
 def readLines(filename, match='',regex=None):
+	count = 0
+
 	temp=open(filename,'r')
 	lines=[line for line in temp if line.strip()]
 	lines.sort(key=K)
 	temp.close()
+
 	if regex=='eval':
 		match=match.replace('se(','eval_s(line,')
 		match=match.replace('xre(','eval_x(line,')
@@ -163,12 +166,18 @@ def readLines(filename, match='',regex=None):
 	for line in lines:
 		if regex=='eval' and eval(match):
 			print formatLine(line)
+			count+=1
 		if regex=="re" and re.search(match,line)!=None:
 			print formatLine(line)
+			count+=1
 		elif regex=="xre" and re.search(match,line)==None:
 			print formatLine(line)
+			count+=1
 		elif match in line:
 			print formatLine(line)
+			count+=1
+	
+	print "%s tasks" % hi(count,CONFIG['hi_priority'])
 
 def eval_s(line,match=''):
 	return match in line
