@@ -11,7 +11,7 @@ CONFIG=dict()
 CONFIG['id_size']=4
 
 # highlighting on
-CONFIG['hi_on']=True
+CONFIG['hi_style']='xterm'
 
 # highlight colors (ANSI palette) used to highlight each part of a task
 CONFIG['hi_id']=4
@@ -142,8 +142,10 @@ def lineid(line):
 
 # highlights a string with the given color
 def hi(string,color):
-	if(CONFIG['hi_on']!=True):
+	if CONFIG['hi_style']==None:
 		return string
+	elif CONFIG['hi_style']=='conky':
+		return "${color%d}%s${color}" % (color%9,string)
 	elif color<8:
 		return "\033[%dm%s\033[0m" % (color+30,string)
 	else:
