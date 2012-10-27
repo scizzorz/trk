@@ -140,7 +140,7 @@ class K(object):
 def lineid(line):
 	line=line.strip()
 	line=RE_DONE.sub('',line)
-	return md5.new(line).hexdigest()[0:CONFIG['id_size']]
+	return md5.new(line).hexdigest()[0:int(CONFIG['id_size'])]
 
 # highlights a string with the given color
 def hi(string,color):
