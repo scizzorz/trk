@@ -30,11 +30,18 @@ CONFIG['priority_char']='!'
 # which editor to use to edit tasks
 CONFIG['editor']='vim'
 
+LOCALE=dict()
+LOCALE['ioerror']="Unable to open file '%s' for %s"
+LOCALE['marked'] = 'Marked as done: %s'
+LOCALE['saved'] = 'Saved new line: %s'
+LOCALE['added'] = 'Added new line: %s'
+LOCALE['numtasks'] = '%s tasks'
+
 # RegExes used to highlight colors
 RE_PROJECT=re.compile(r'(^|\s)(\+\w+)')
 RE_CONTEXT=re.compile(r'(^|\s)(\@\w+)')
 RE_PRIORITY=re.compile(r'\s*(\((\d)\))\s*')
-RE_DUE=re.compile(r'(\[(\d{1,2})/(\d{1,2})(/(\d{2,4}))*(@(\d{1,2})(:(\d{1,2}))*(am|pm)*)*\])')
+RE_DUE=re.compile(r'(\[(\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*\])')
 RE_DONE=re.compile(r'(^x\s*)')
 
 RE_SETTING=re.compile(r'(\w+)\s*\=\s*(.*)')
@@ -179,31 +186,35 @@ def formatDate(obj):
 def readLines(filename, match='',regex=None):
 	count = 0
 
-	temp=open(filename,'r')
-	lines=[line for line in temp if line.strip()]
-	lines.sort(key=K)
-	temp.close()
+	try:
+		temp=open(filename,'r+')
+	except IOError:
+		print LOCALE['ioerror'] % (filename,'reading')
+	else:
+		lines=[line for line in temp if line.strip()]
+		lines.sort(key=K)
+		temp.close()
 
-	if regex=='eval':
-		match=match.replace('se(','eval_s(line,')
-		match=match.replace('xre(','eval_x(line,')
-		match=match.replace('re(','eval_r(line,')
+		if regex=='eval':
+			match=match.replace('se(','eval_s(line,')
+			match=match.replace('xre(','eval_x(line,')
+			match=match.replace('re(','eval_r(line,')
 
-	for line in lines:
-		if regex=='eval' and eval(match):
-			print formatLine(line)
-			count+=1
-		if regex=="re" and re.search(match,line)!=None:
-			print formatLine(line)
-			count+=1
-		elif regex=="xre" and re.search(match,line)==None:
-			print formatLine(line)
-			count+=1
-		elif match in line:
-			print formatLine(line)
-			count+=1
-	
-	print "%s tasks" % hi(count,CONFIG['hi_priority'])
+		for line in lines:
+			if regex=='eval' and eval(match):
+				print formatLine(line)
+				count+=1
+			if regex=="re" and re.search(match,line)!=None:
+				print formatLine(line)
+				count+=1
+			elif regex=="xre" and re.search(match,line)==None:
+				print formatLine(line)
+				count+=1
+			elif match in line:
+				print formatLine(line)
+				count+=1
+		
+		print LOCALE['numtasks'] % hi(count,CONFIG['hi_priority'])
 
 def eval_s(line,match=''):
 	return match in line
@@ -242,38 +253,50 @@ def formatLine(line):
 
 # write lines to the file
 def writeLine(filename,line):
-	temp=open(filename,'a')
-	print "Added %s" % formatLine(line)
-	temp.write('%s\n' % line)
-	temp.close()
+	try:
+		temp=open(filename,'a+')
+	except IOError:
+		print LOCALE['ioerror'] % (filename,'appending')
+	else:
+		print LOCALE['added'] % formatLine(line)
+		temp.write('%s\n' % line)
+		temp.close()
 
 # mark lines as complete
 # also used to edit lines
 def markLines(filename,match='',edit=None):
-	temp=open(filename,'r')
-	lines=[line for line in temp if line.strip()]
-	lines.sort(key=K)
-	temp.close()
+	try:
+		temp=open(filename,'r+')
+	except IOError:
+		print LOCALE['ioerror'] % (filename,'reading')
+	else:
+		lines=[line for line in temp if line.strip()]
+		lines.sort(key=K)
+		temp.close()
 	
-	temp=open(filename,'w')
-	for line in lines:
-		line=line.strip()
+	try:
+		temp=open(filename,'w+')
+	except IOError:
+		print LOCALE['ioerror'] % (filename,'writing')
+	else:
+		for line in lines:
+			line=line.strip()
 
-		# if we're editing, we don't care if it's done or not
-		if edit and match in lineid(line):
-			line=editLine(line)
-			temp.write('%s\n' % line)
-			print "Saved new line %s" % formatLine(line)
+			# if we're editing, we don't care if it's done or not
+			if edit and match in lineid(line):
+				line=editLine(line)
+				temp.write('%s\n' % line)
+				print LOCALE['saved'] % formatLine(line)
 
-		# if we're just marking it, we need to make sure it's not already marked
-		elif match in lineid(line) and RE_DONE.search(line)==None:
-			temp.write('x %s\n' % line)
-			print "Marked line %s done" % hi('['+lineid(line)+']',CONFIG['hi_id'])
+			# if we're just marking it, we need to make sure it's not already marked
+			elif match in lineid(line) and RE_DONE.search(line)==None:
+				temp.write('x %s\n' % line)
+				print LOCALE['marked'] % formatLine(line)
 
-		# none
-		else:
-			temp.write('%s\n' % line)
-	temp.close()
+			# none
+			else:
+				temp.write('%s\n' % line)
+		temp.close()
 
 def editLine(line):
 	# this code is kinda borrowed from Mercurial...
@@ -303,16 +326,20 @@ def editLine(line):
 def settings():
 	# get filename and open it
 	settingsname="%s/%s" % (expanduser("~"),".trkrc")
-	lines = open(settingsname,'r')
-
-	# loop through it
-	for line in lines:
-		# if it matches our settings regex
-		match=RE_SETTING.search(line)
-		
-		# set the configuration option!
-		if match!=None:
-			CONFIG[match.group(1)] = match.group(2)
+	try:
+		lines = open(settingsname,'r')
+	except IOError:
+		pass
+	else:
+		# loop through it
+		for line in lines:
+			# if it matches our settings regex
+			match=RE_SETTING.search(line)
+			
+			# set the configuration option!
+			if match!=None:
+				CONFIG[match.group(1)] = match.group(2)
+		lines.close()
 
 
 def main(argv):
