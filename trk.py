@@ -212,10 +212,10 @@ def formatLine(line):
 
 
 	# highlighting subs
-	line=RE_PROJECT.sub('\g<1>'+hi('\g<2>',CONFIG['hi_project']),line)
-	line=RE_CONTEXT.sub('\g<1>'+hi('\g<2>',CONFIG['hi_context']),line)
+	line=RE_PROJECT.sub(r'\1'+hi(r'\2',CONFIG['hi_project']),line)
+	line=RE_CONTEXT.sub(r'\1'+hi(r'\2',CONFIG['hi_context']),line)
 	line=RE_PRIORITY.sub('',line)
-	line=RE_DUE.sub(hi('\g<0>',CONFIG['hi_due']),line)
+	line=RE_DUE.sub(hi(r'\0',CONFIG['hi_due']),line)
 
 	# print them so they're aligned nicely
 	if RE_DONE.search(line)!=None:
