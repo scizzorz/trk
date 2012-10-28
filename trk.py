@@ -160,7 +160,21 @@ def hi(string,color):
 	# none
 	else:
 		return string
+
+def formatDate(obj):
+	ret = '%s/%s' % (obj.group(2),obj.group(3))
+	if obj.group(5)!=None: # year
+		ret += '/'+obj.group(5)
 	
+	if obj.group(7)!=None: # hour / time
+		ret += ' '+obj.group(7)
+		if obj.group(8)!=None: # minutes
+			ret += obj.group(8)
+		if obj.group(10)!=None: # am/pm
+			ret += obj.group(10)
+	
+	return hi(ret,CONFIG['hi_due'])
+
 # read tasks
 def readLines(filename, match='',regex=None):
 	count = 0
@@ -215,7 +229,7 @@ def formatLine(line):
 	line=RE_PROJECT.sub(r'\1'+hi(r'\2',CONFIG['hi_project']),line)
 	line=RE_CONTEXT.sub(r'\1'+hi(r'\2',CONFIG['hi_context']),line)
 	line=RE_PRIORITY.sub('',line)
-	line=RE_DUE.sub(hi(r'\0',CONFIG['hi_due']),line)
+	line=RE_DUE.sub(formatDate,line)
 
 	# print them so they're aligned nicely
 	if RE_DONE.search(line)!=None:
