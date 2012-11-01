@@ -36,6 +36,8 @@ LOCALE['marked'] = 'Marked as done: %s'
 LOCALE['saved'] = 'Saved new line: %s'
 LOCALE['added'] = 'Added new line: %s'
 LOCALE['numtasks'] = '%s tasks'
+LOCALE['label_done'] = 'x %s %d/%d completed'
+LOCALE['label_notdone'] = '%s %d/%d completed'
 
 # RegExes used to highlight colors
 RE_PROJECT=re.compile(r'(^|\s)(\+\w+)')
@@ -182,6 +184,14 @@ def formatDate(obj):
 	
 	return hi(ret,CONFIG['hi_due'])
 
+# eval shortcuts
+def eval_s(line,match=''):
+	return match in line
+def eval_r(line,match=''):
+	return re.search(match,line)!=None
+def eval_x(line,match=''):
+	return re.search(match,line)==None
+
 # read tasks
 def readLines(filename, match='',regex=None):
 	count = 0
@@ -216,12 +226,35 @@ def readLines(filename, match='',regex=None):
 		
 		print LOCALE['numtasks'] % hi(count,CONFIG['hi_priority'])
 
-def eval_s(line,match=''):
-	return match in line
-def eval_r(line,match=''):
-	return re.search(match,line)!=None
-def eval_x(line,match=''):
-	return re.search(match,line)==None
+def countMatches(filename,match=''):
+	try:
+		temp = open(filename,'r+')
+	except IOError:
+		print LOCALE['ioerror'] % (filename,'reading')
+	else:
+		lines=[line for line in temp if line.strip()]
+		temp.close()
+
+		counts=dict()
+
+
+		for line in lines:
+			res=match.search(line)
+			if res!=None:
+				if res.group(2) not in counts: # label hasn't been encountered yet
+					counts[res.group(2)]=[0,0]
+
+				if RE_DONE.search(line)==None: # task isn't done
+					counts[res.group(2)][0]+=1
+				else: # task is done
+					counts[res.group(2)][1]+=1
+
+		for label in counts:
+			if counts[label][0]==0:
+				temp = LOCALE['label_done'] % (label,counts[label][1],counts[label][0]+counts[label][1])
+			else:
+				temp = LOCALE['label_notdone'] % (label,counts[label][1],counts[label][0]+counts[label][1])
+			print formatLine(temp)
 
 # format a line for printing
 def formatLine(line):
@@ -382,7 +415,10 @@ def main(argv):
 
 	elif len(argv)==1: # only one argument, probably an alias
 		task=argv[0]
-		if ('alias_'+task) in CONFIG:
+
+		# user-defined aliases are evaluated first if the user decides they hate mine
+		# and want to override them with their own
+		if ('alias_'+task) in CONFIG: 
 			main(['eval',CONFIG['alias_'+task]])
 
 		elif task[0]=='@' and ' ' not in task:
@@ -394,10 +430,16 @@ def main(argv):
 		elif task[0] in ('0','1','2','3','4','5','6','7','8','9'):
 			main(['eval','se("(%s)") and xre("^x\s*")' % task])
 
-		elif argv[0] in ('x','completed','finished','hidden'):
+		elif task in ('x','completed','finished','hidden'):
 			main(['regex','^x\s*'])
 
-		elif argv[0] in ('all'):
+		elif task in ('projects'):
+			countMatches(filename,RE_PROJECT)
+
+		elif task in ('contexts'):
+			countMatches(filename,RE_CONTEXT)
+
+		elif task in ('all'):
 			main(['search',''])
 
 		else: # no alias
