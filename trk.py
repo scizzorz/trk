@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import sys, os, getopt, md5, re, time, tempfile
 from os.path import expanduser
 
