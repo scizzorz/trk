@@ -24,6 +24,14 @@ List all tasks:
 
 	trk.py all
 
+List all projects:
+
+	trk.py projects
+
+List all contexts:
+
+	trk.py contexts
+
 List completed tasks (alias for `trk.py regex "^x\s*"`):
 
 	trk.py x|completed|finished|hidden

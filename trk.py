@@ -249,12 +249,18 @@ def countMatches(filename,match=''):
 				else: # task is done
 					counts[res.group(2)][1]+=1
 
+		sortable=list()
 		for label in counts:
 			if counts[label][0]==0:
 				temp = LOCALE['label_done'] % (label,counts[label][1],counts[label][0]+counts[label][1])
 			else:
 				temp = LOCALE['label_notdone'] % (label,counts[label][1],counts[label][0]+counts[label][1])
-			print formatLine(temp)
+			sortable.append(temp)
+
+		sortable.sort(key=K)
+
+		for line in sortable:
+			print formatLine(line)
 
 # format a line for printing
 def formatLine(line):
