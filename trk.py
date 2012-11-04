@@ -30,6 +30,20 @@ CONFIG['priority_char']='!'
 # which editor to use to edit tasks
 CONFIG['editor']='vim'
 
+# show tasks count at the end or not?
+CONFIG['show_count']=True
+
+# what character to use for indents
+# how the heck do you change this in
+# a config file...
+CONFIG['indent']='      '
+
+# state tracking
+STATE=dict()
+STATE['show_id']=True
+STATE['indent']=0
+
+
 LOCALE=dict()
 LOCALE['ioerror']="Unable to open file '%s' for %s"
 LOCALE['marked'] = 'Marked as done: %s'
@@ -224,7 +238,7 @@ def readLines(filename, match='',regex=None):
 				print formatLine(line)
 				count+=1
 		
-		print LOCALE['numtasks'] % hi(count,CONFIG['hi_priority'])
+		if CONFIG['show_count']: print LOCALE['numtasks'] % hi(count,CONFIG['hi_priority'])
 
 def countMatches(filename,match=''):
 	try:
@@ -254,13 +268,31 @@ def countMatches(filename,match=''):
 			if counts[label][0]==0:
 				temp = LOCALE['label_done'] % (label,counts[label][1],counts[label][0]+counts[label][1])
 			else:
-				temp = LOCALE['label_notdone'] % (label,counts[label][1],counts[label][0]+counts[label][1])
+				temp = label
 			sortable.append(temp)
 
 		sortable.sort(key=K)
 
 		for line in sortable:
-			print formatLine(line)
+			STATE['show_id']=False
+			if RE_DONE.search(line)!=None: # this group is completed, don't list fancy infos
+				print formatLine(line)
+				STATE['show_id']=True
+			else: # list fancy infos
+				print formatLine(LOCALE['label_notdone'] % (line,counts[line][1],counts[line][0]+counts[line][1]))
+				STATE['show_id']=True
+
+				# save the show_count setting and indent output
+				STATE['show_count']=CONFIG['show_count']
+				CONFIG['show_count']=False
+				STATE['indent']+=1
+
+				# print
+				main(['eval','se("%s") and xre("^x\s*")' % line])
+
+				# restore things
+				CONFIG['show_count']=STATE['show_count']
+				STATE['indent']-=1
 
 # format a line for printing
 def formatLine(line):
@@ -288,7 +320,10 @@ def formatLine(line):
 	else:
 		line="  "+priority+line.strip()
 
-	return "%s %s" % (hi("["+lineid(preColorLine)+"]",CONFIG['hi_id']),line)
+	if STATE['show_id']:
+		return "%s%s %s" % (STATE['indent']*CONFIG['indent'],hi("["+lineid(preColorLine)+"]",CONFIG['hi_id']),line)
+	else:
+		return "%s%s" % (STATE['indent']*CONFIG['indent'],line)
 
 # write lines to the file
 def writeLine(filename,line):
@@ -439,10 +474,10 @@ def main(argv):
 		elif task in ('x','completed','finished','hidden'):
 			main(['regex','^x\s*'])
 
-		elif task in ('projects'):
+		elif task in ('projects','proj','prj'):
 			countMatches(filename,RE_PROJECT)
 
-		elif task in ('contexts'):
+		elif task in ('contexts','cont','ctx'):
 			countMatches(filename,RE_CONTEXT)
 
 		elif task in ('all'):
