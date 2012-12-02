@@ -61,6 +61,7 @@ RE_CONTEXT=re.compile(r'(^|\s)(\@[\w\+]+)')
 RE_PRIORITY=re.compile(r'\s*(\((\d)\))\s*')
 RE_DUE=re.compile(r'(\[(\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*\])')
 RE_DONE=re.compile(r'(^x\s*)')
+RE_WHITESPACE=re.compile(r'\s+')
 
 RE_SETTING=re.compile(r'(\w+)\s*\=\s*(.*)')
 
@@ -312,6 +313,8 @@ def formatLine(line,preid=None):
 	else:
 		priority=''
 
+	# strip duplicate whitespace (HTML DOES IT WHY CAN'T I)
+	line=RE_WHITESPACE.sub(' ',line)
 
 	# highlighting subs
 	line=RE_PROJECT.sub(r'\1'+hi(r'\2',CONFIG['hi_project']),line)
