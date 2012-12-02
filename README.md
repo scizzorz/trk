@@ -123,7 +123,9 @@ Basic task storage/layout:
 * due date like this: `[10/31]`, `[10/31/2012]`, etc.
 * due date + time like this: `[11/22@10am]`, `[10/25@8:30pm]`, `[10/31 8pm]`, etc.
 * projects like this: `+project`
+* subprojects like this: `+project+subproject`
 * contexts like this: `@context`
+* subcontexts like this: `@context+subcontext`
 * finished like this: `x task` (the lowercase x *must* be the first character and *must* be followed by a space!)
 * ideally have it limit it to one priority / date / time per task, but we'll see about that
 * no limit to number of projects / contexts it can have
