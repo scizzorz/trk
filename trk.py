@@ -54,6 +54,7 @@ LOCALE['numlines'] = '%s lines'
 LOCALE['numlines_single'] = '%s line'
 LOCALE['label'] = '%s %s lines'
 LOCALE['label_single'] = '%s %s line'
+LOCALE['everything'] = 'everything else'
 
 # RegExes used to highlight colors
 RE_PROJECT=re.compile(r'(^|\s)(\+[\w\+]+)')
@@ -263,13 +264,17 @@ def countMatches(filename,match=''):
 		for line in lines:
 			res=match.search(line)
 			if res!=None:
-				if res.group(2) not in counts: # label hasn't been encountered yet
-					counts[res.group(2)]=[0,0]
+				label=res.group(2)
+			else:
+				label=LOCALE['everything']
 
-				if RE_DONE.search(line)==None: # task isn't done
-					counts[res.group(2)][0]+=1
-				else: # task is done
-					counts[res.group(2)][1]+=1
+			if label not in counts: # label hasn't been encountered yet
+				counts[label]=[0,0]
+
+			if RE_DONE.search(line)==None: # task isn't done
+				counts[label][0]+=1
+			else: # task is done
+				counts[label][1]+=1
 
 		sortable=list()
 		for label in counts:
@@ -295,7 +300,11 @@ def countMatches(filename,match=''):
 				STATE['indent']+=1
 
 				# print
-				readLines(filename,line,'wipe')
+				if line==LOCALE['everything']:
+					#readLines(filename,'se(%s) and xre(^x\s*)' % match,'eval')
+					main(['eval','xre("%s") and xre("^x\s*")' % match.pattern])
+				else:
+					readLines(filename,line,'wipe')
 
 				# restore things
 				CONFIG['show_count']=STATE['show_count']
