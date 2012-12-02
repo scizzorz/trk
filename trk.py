@@ -227,7 +227,10 @@ def readLines(filename, match='',regex=None):
 			match=match.replace('re(','eval_r(line,')
 
 		for line in lines:
-			if regex=='eval' and eval(match):
+			if regex=='wipe' and match in line and RE_DONE.search(line)==None:
+				print formatLine(line.replace(match,''),lineid(line))
+				count+=1
+			elif regex=='eval' and eval(match):
 				print formatLine(line)
 				count+=1
 			elif regex=="re" and re.search(match,line)!=None:
@@ -291,14 +294,14 @@ def countMatches(filename,match=''):
 				STATE['indent']+=1
 
 				# print
-				main(['eval','se("%s") and xre("^x\s*")' % line])
+				readLines(filename,line,'wipe')
 
 				# restore things
 				CONFIG['show_count']=STATE['show_count']
 				STATE['indent']-=1
 
 # format a line for printing
-def formatLine(line):
+def formatLine(line,preid=None):
 	line=line.strip()
 	preColorLine=line
 
@@ -324,7 +327,9 @@ def formatLine(line):
 		line="  "+priority+line.strip()
 
 	if STATE['show_id']:
-		return "%s%s %s" % (STATE['indent']*CONFIG['indent'],hi("["+lineid(preColorLine)+"]",CONFIG['hi_id']),line)
+		if preid==None:
+			preid=lineid(preColorLine)	
+		return "%s%s %s" % (STATE['indent']*CONFIG['indent'],hi("["+preid+"]",CONFIG['hi_id']),line)
 	else:
 		return "%s%s" % (STATE['indent']*CONFIG['indent'],line)
 
