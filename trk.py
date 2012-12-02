@@ -230,13 +230,13 @@ def readLines(filename, match='',regex=None):
 			if regex=='eval' and eval(match):
 				print formatLine(line)
 				count+=1
-			if regex=="re" and re.search(match,line)!=None:
+			elif regex=="re" and re.search(match,line)!=None:
 				print formatLine(line)
 				count+=1
 			elif regex=="xre" and re.search(match,line)==None:
 				print formatLine(line)
 				count+=1
-			elif match in line:
+			elif regex==None and match in line:
 				print formatLine(line)
 				count+=1
 		
