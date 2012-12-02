@@ -14,7 +14,7 @@ CONFIG['id_size']=4
 CONFIG['hi_style']='xterm'
 
 # highlight colors (ANSI palette) used to highlight each part of a task
-CONFIG['hi_id']=4
+CONFIG['hi_id']=3
 CONFIG['hi_project']=10
 CONFIG['hi_context']=11
 CONFIG['hi_priority']=9
@@ -38,6 +38,7 @@ CONFIG['show_count']=True
 # a config file...
 CONFIG['indent']='      '
 
+
 # state tracking
 STATE=dict()
 STATE['show_id']=True
@@ -49,9 +50,10 @@ LOCALE['ioerror']="Unable to open file '%s' for %s"
 LOCALE['marked'] = 'Marked as done: %s'
 LOCALE['saved'] = 'Saved new line: %s'
 LOCALE['added'] = 'Added new line: %s'
-LOCALE['numtasks'] = '%s tasks'
-LOCALE['label_done'] = 'x %s %d/%d completed'
-LOCALE['label_notdone'] = '%s %d/%d completed'
+LOCALE['numlines'] = '%s lines'
+LOCALE['numlines_single'] = '%s line'
+LOCALE['label'] = '%s %s lines'
+LOCALE['label_single'] = '%s %s line'
 
 # RegExes used to highlight colors
 RE_PROJECT=re.compile(r'(^|\s)(\+\w+)')
@@ -238,7 +240,9 @@ def readLines(filename, match='',regex=None):
 				print formatLine(line)
 				count+=1
 		
-		if CONFIG['show_count']: print LOCALE['numtasks'] % hi(count,CONFIG['hi_priority'])
+
+		loc = ('numlines','numlines_single')[count==1];
+		if CONFIG['show_count']: print LOCALE[loc] % hi(count,CONFIG['hi_priority'])
 
 def countMatches(filename,match=''):
 	try:
@@ -265,11 +269,9 @@ def countMatches(filename,match=''):
 
 		sortable=list()
 		for label in counts:
-			if counts[label][0]==0:
-				temp = LOCALE['label_done'] % (label,counts[label][1],counts[label][0]+counts[label][1])
-			else:
+			if counts[label][0]!=0:
 				temp = label
-			sortable.append(temp)
+				sortable.append(temp)
 
 		sortable.sort(key=K)
 
@@ -279,7 +281,8 @@ def countMatches(filename,match=''):
 				print formatLine(line)
 				STATE['show_id']=True
 			else: # list fancy infos
-				print formatLine(LOCALE['label_notdone'] % (line,counts[line][1],counts[line][0]+counts[line][1]))
+				loc = ('label','label_single')[counts[line][0]==1];
+				print formatLine(LOCALE[loc] % (line,hi(counts[line][0],CONFIG['hi_priority'])))
 				STATE['show_id']=True
 
 				# save the show_count setting and indent output
