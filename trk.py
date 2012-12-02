@@ -473,10 +473,10 @@ def main(argv):
 		if ('alias_'+task) in CONFIG: 
 			main(['eval',CONFIG['alias_'+task]])
 
-		elif task[0]=='@' and ' ' not in task:
+		elif task[0]=='@' and ' ' not in task and len(task)>1:
 			main(['eval','se("%s") and xre("^x\s*")' % task])
 
-		elif task[0]=='+' and ' ' not in task:
+		elif task[0]=='+' and ' ' not in task and len(task)>1:
 			main(['eval','se("%s") and xre("^x\s*")' % task])
 
 		elif task[0] in ('0','1','2','3','4','5','6','7','8','9'):
@@ -485,10 +485,10 @@ def main(argv):
 		elif task in ('x','completed','finished','hidden'):
 			main(['regex','^x\s*'])
 
-		elif task in ('projects','proj','prj'):
+		elif task in ('projects','proj','prj','+'):
 			countMatches(filename,RE_PROJECT)
 
-		elif task in ('contexts','cont','ctx'):
+		elif task in ('contexts','cont','ctx','@'):
 			countMatches(filename,RE_CONTEXT)
 
 		elif task in ('all'):
