@@ -45,6 +45,7 @@ STATE['show_id']=True
 STATE['indent']=0
 
 
+# formatting dictionary
 LOCALE=dict()
 LOCALE['ioerror']="Unable to open file '%s' for %s"
 LOCALE['marked'] = 'Marked as done: %s'
@@ -341,7 +342,7 @@ def formatLine(line,preid=None):
 	if STATE['show_id']:
 		if preid==None:
 			preid=lineid(preColorLine)	
-		return "%s%s %s" % (STATE['indent']*CONFIG['indent'],hi("["+preid+"]",CONFIG['hi_id']),line)
+		return "%s%s %s" % (STATE['indent']*CONFIG['indent'],hi(preid,CONFIG['hi_id']),line)
 	else:
 		return "%s%s" % (STATE['indent']*CONFIG['indent'],line)
 
@@ -421,7 +422,7 @@ def settings():
 	# get filename and open it
 	settingsname="%s/%s" % (expanduser("~"),".trkrc")
 	try:
-		lines = open(settingsname,'r')
+		lines = open(STATE['settingsfile'],'r')
 	except IOError:
 		pass
 	else:
