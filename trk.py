@@ -43,6 +43,8 @@ CONFIG['indent']='      '
 STATE=dict()
 STATE['show_id']=True
 STATE['indent']=0
+STATE['consumed']=1
+STATE['settingsfile']="%s/%s" % (expanduser("~"),".trkrc")
 
 
 # formatting dictionary
@@ -418,13 +420,24 @@ def editLine(line):
 	# return new text
 	return t
 
+def cmdsettings(argv):
+	i = 0
+	# this system is very bad and only works if the flags are in the beginning
+	# they should just be spliced out of the array somehow instead of assuming
+	# they're at the beginning
+	while i < len(argv):
+		if argv[i]=='-f':
+			i+=1
+			STATE['settingsfile'] = argv[i]
+			STATE['consumed']+=2
+		i+=1
+
 def settings():
 	# get filename and open it
-	settingsname="%s/%s" % (expanduser("~"),".trkrc")
 	try:
 		lines = open(STATE['settingsfile'],'r')
 	except IOError:
-		pass
+		print LOCALE['ioerror'] % (STATE['settingsfile'],'reading')
 	else:
 		# loop through it
 		for line in lines:
@@ -511,5 +524,6 @@ def main(argv):
 		main(['xregex','^x\s*'])
 
 if __name__=='__main__':
+	cmdsettings(sys.argv[STATE['consumed']:])
 	settings()
-	main(sys.argv[1:])
+	main(sys.argv[STATE['consumed']:])
