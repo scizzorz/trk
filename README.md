@@ -83,13 +83,13 @@ the string length for each task's unique identifier
 `hi_style = xterm`  
 the type of highlighting format `trk` should use. `xterm` and `conky` will print appropriate color escape codes, while any other value with turn off highlighting
 
-`hi_id = 4`  
+`hi_id = 7`  
 the palette color for highlighting task identifiers
 
-`hi_project = 10`  
+`hi_project = 11`  
 ...task projects
 
-`hi_context 11`  
+`hi_context = 10`  
 ...task contexts
 
 `hi_priority = 9`  
@@ -98,7 +98,7 @@ the palette color for highlighting task identifiers
 `hi_due = 14`  
 ...task due dates
 
-`hi_done = 8`  
+`hi_done = 9`  
 ...task completion checkmarks
 
 `file = .todo`  
