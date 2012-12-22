@@ -116,28 +116,30 @@ show the number of tasks at the end of each output or not
 `alias_XXX = YYY`  
 allows you to create custom aliases. Expands `trk.py XXX` into `trk.py eval YYY`. Can also use arguments, eg `alias_r = re('%s')` will cause `trk.py r ^x` to expand to `trk.py eval "re('^x')"`
 
-## Basic roadmap
+## Basic system
 
 Basic task storage/layout:
 
-* plaintext
+* stored as a plaintext file
 * one task per line
-* priority like this: `(3)` (higher number is higher priority)
-* due date like this: `[10/31]`, `[10/31/2012]`, etc.
-* due date + time like this: `[11/22@10am]`, `[10/25@8:30pm]`, `[10/31 8pm]`, etc.
-* projects like this: `+project`
-* subprojects like this: `+project+subproject`
-* contexts like this: `@context`
-* subcontexts like this: `@context+subcontext`
-* finished like this: `x task` (the lowercase x *must* be the first character and *must* be followed by a space!)
-* ideally have it limit it to one priority / date / time per task, but we'll see about that
-* no limit to number of projects / contexts it can have
+* priority is formatted like this: `(3)` (higher number is higher priority)
+* due dates are formatted like this: `[10/31]`, `[10/31/2012]`, etc.
+* due dates with a time are formatted like this: `[11/22@10am]`, `[10/25@8:30pm]`, `[10/31 8pm]`, etc.
+* projects are formatted like this: `+project`
+* subprojects are formatted like this: `+project+subproject`
+* contexts are formatted like this: `@context`
+* subcontexts are formatted like this: `@context+subcontext`
+* finished tasks are formatted like this: `x task` (the lowercase x *must* be the first character and *must* be followed by a space!)
+* ideally it should only be one priority / date / time per task, but we'll see if I do anything to enforce that
+* no limit to number of projects / contexts a task can have
 
 ### Examples
 
-	(2) [10/22@8pm] submit lab 220.2 +cs220 @desktop
-	(2) finish work for Jim +msa @desktop
-	(1) [10/31] make Halloween costume
-	(1) [10/31] buy Halloween costume materials @shopping
-	work on +trk
+	(2) [10/22] +cs220+lab2 submit @desktop
+	(2) [10/15] +cs220+lab2+checkpoint submit @desktop
+	(2) [10/14] +cs220+lab2+problem1 solve @desktop
+	(2) [10/13] +cs220+lab2+problem2 solve @desktop
+	(2) +work finish work for guy @desktop
+	(1) [10/31] +halloween+costume make
+	(1) [10/31] +halloween+costume buy materials @shopping
 	call Mom @phone
