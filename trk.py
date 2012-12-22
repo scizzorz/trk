@@ -14,12 +14,12 @@ CONFIG['id_size']=4
 CONFIG['hi_style']='xterm'
 
 # highlight colors (ANSI palette) used to highlight each part of a task
-CONFIG['hi_id']=3
-CONFIG['hi_project']=10
-CONFIG['hi_context']=11
+CONFIG['hi_id']=7
+CONFIG['hi_project']=11
+CONFIG['hi_context']=10
 CONFIG['hi_priority']=9
 CONFIG['hi_due']=14
-CONFIG['hi_done']=8
+CONFIG['hi_done']=9
 
 # which file to use
 CONFIG['file']='.todo'
