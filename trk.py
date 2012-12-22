@@ -7,6 +7,14 @@ from os.path import expanduser
 # and have command-line flags as well
 CONFIG=dict()
 
+# the configuration file
+# this can't really be changed in a config file,
+# but it can be changed by a flag
+CONFIG['config']="%s/%s" % (expanduser("~"),".trkrc")
+
+# which file to use
+CONFIG['file']='.todo'
+
 # size of the md5 sum substring used as the task id
 CONFIG['id_size']=4
 
@@ -21,9 +29,6 @@ CONFIG['hi_priority']=9
 CONFIG['hi_due']=14
 CONFIG['hi_done']=9
 
-# which file to use
-CONFIG['file']='.todo'
-
 # which character to use for priority
 CONFIG['priority_char']='!'
 
@@ -37,11 +42,6 @@ CONFIG['show_count']=True
 # how the heck do you change this in
 # a config file...
 CONFIG['indent']='   '
-
-# the configuration file
-# this can't really be changed in a config file,
-# but it can be changed by a flag
-CONFIG['config']="%s/%s" % (expanduser("~"),".trkrc")
 
 
 # state tracking

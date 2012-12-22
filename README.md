@@ -77,6 +77,9 @@ Edit a task:
 `config = ~/.trkrc`  
 the default configuration file
 
+`file = .todo`  
+the file used to store all your tasks
+
 `id_size = 4`  
 the string length for each task's unique identifier
 
@@ -100,9 +103,6 @@ the palette color for highlighting task identifiers
 
 `hi_done = 9`  
 ...task completion checkmarks
-
-`file = .todo`  
-the file used to store all your tasks
 
 `priority_char = !`  
 the character used to represent priority
