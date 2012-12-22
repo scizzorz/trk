@@ -36,12 +36,13 @@ CONFIG['show_count']=True
 # what character to use for indents
 # how the heck do you change this in
 # a config file...
-CONFIG['indent']='      '
+CONFIG['indent']='   '
 
 
 # state tracking
 STATE=dict()
 STATE['show_id']=True
+STATE['magic_indent']=True
 STATE['indent']=0
 STATE['consumed']=1
 STATE['settingsfile']="%s/%s" % (expanduser("~"),".trkrc")
@@ -290,13 +291,16 @@ def countMatches(filename,match=''):
 
 		for line in sortable:
 			STATE['show_id']=False
+			STATE['magic_indent']=False
 			if RE_DONE.search(line)!=None: # this group is completed, don't list fancy infos
 				print formatLine(line)
 				STATE['show_id']=True
+				STATE['magic_indent']=True
 			else: # list fancy infos
 				loc = ('label','label_single')[counts[line][0]==1];
 				print formatLine(LOCALE[loc] % (line,hi(counts[line][0],CONFIG['hi_priority'])))
 				STATE['show_id']=True
+				STATE['magic_indent']=True
 
 				# save the show_count setting and indent output
 				STATE['show_count']=CONFIG['show_count']
@@ -339,8 +343,10 @@ def formatLine(line,preid=None):
 	if RE_DONE.search(line)!=None:
 		line=RE_DONE.sub('',line)
 		line=hi("x",CONFIG['hi_done'])+" "+priority+line.strip()
-	else:
+	elif STATE['magic_indent']:
 		line="  "+priority+line.strip()
+	else:
+		line=priority+line.strip()
 
 	if STATE['show_id']:
 		if preid==None:
