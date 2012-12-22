@@ -38,14 +38,17 @@ CONFIG['show_count']=True
 # a config file...
 CONFIG['indent']='   '
 
+# the configuration file
+# this can't really be changed in a config file,
+# but it can be changed by a flag
+CONFIG['config']="%s/%s" % (expanduser("~"),".trkrc")
+
 
 # state tracking
 STATE=dict()
 STATE['show_id']=True
 STATE['magic_indent']=True
 STATE['indent']=0
-STATE['consumed']=1
-STATE['settingsfile']="%s/%s" % (expanduser("~"),".trkrc")
 
 
 # formatting dictionary
@@ -433,23 +436,23 @@ def editLine(line):
 	return t
 
 def cmdsettings(argv):
-	i = 0
-	# this system is very bad and only works if the flags are in the beginning
-	# they should just be spliced out of the array somehow instead of assuming
-	# they're at the beginning
-	while i < len(argv):
-		if argv[i]=='-f':
-			i+=1
-			STATE['settingsfile'] = argv[i]
-			STATE['consumed']+=2
-		i+=1
+	configs = list()
+	for key in CONFIG:
+		configs.append(key+'=')
+
+	options, remainder = getopt.getopt(argv,'',configs)
+
+	for opt, arg in options:
+		CONFIG[opt[2:]] = arg
+
+	return remainder
 
 def settings():
 	# get filename and open it
 	try:
-		lines = open(STATE['settingsfile'],'r')
+		lines = open(CONFIG['config'],'r')
 	except IOError:
-		print LOCALE['ioerror'] % (CONFIG['settingsfile'],'reading')
+		print LOCALE['ioerror'] % (CONFIG['config'],'reading')
 		sys.exit(1)
 	else:
 		# loop through it
@@ -537,6 +540,6 @@ def main(argv):
 		main(['xregex','^x\s*'])
 
 if __name__=='__main__':
-	cmdsettings(sys.argv[STATE['consumed']:])
+	argv = cmdsettings(sys.argv[1:])
 	settings()
-	main(sys.argv[STATE['consumed']:])
+	main(argv)

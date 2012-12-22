@@ -72,8 +72,10 @@ Edit a task:
 
 ## Settings
 
-`trk` reads settings from a `.trkrc` in the user's home directory. So far, here are all the valid options and their defaults:
+`trk` can read its configuration from a file or from command line flags. When writing in a file, put each declaration on its own line and separate the variable from its value with an equals sign. When setting at the command line, each variable's name can be used as a long flag (eg `--config=~/.not-the-default-trkrc`). Here is a list of available options:
 
+`config = ~/.trkrc`  
+the default configuration file
 `id_size = 4`  
 the string length for each task's unique identifier
 
