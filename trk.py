@@ -222,6 +222,7 @@ def readLines(filename, match='',regex=None):
 		temp=open(filename,'r+')
 	except IOError:
 		print LOCALE['ioerror'] % (filename,'reading')
+		sys.exit(1)
 	else:
 		lines=[line for line in temp if line.strip()]
 		lines.sort(key=K)
@@ -259,6 +260,7 @@ def countMatches(filename,match=''):
 		temp = open(filename,'r+')
 	except IOError:
 		print LOCALE['ioerror'] % (filename,'reading')
+		sys.exit(1)
 	else:
 		lines=[line for line in temp if line.strip()]
 		temp.close()
@@ -361,6 +363,7 @@ def writeLine(filename,line):
 		temp=open(filename,'a+')
 	except IOError:
 		print LOCALE['ioerror'] % (filename,'appending')
+		sys.exit(1)
 	else:
 		print LOCALE['added'] % formatLine(line)
 		temp.write('%s\n' % line)
@@ -373,6 +376,7 @@ def markLines(filename,match='',edit=None):
 		temp=open(filename,'r+')
 	except IOError:
 		print LOCALE['ioerror'] % (filename,'reading')
+		sys.exit(1)
 	else:
 		lines=[line for line in temp if line.strip()]
 		lines.sort(key=K)
@@ -382,6 +386,7 @@ def markLines(filename,match='',edit=None):
 		temp=open(filename,'w+')
 	except IOError:
 		print LOCALE['ioerror'] % (filename,'writing')
+		sys.exit(1)
 	else:
 		for line in lines:
 			line=line.strip()
@@ -444,7 +449,8 @@ def settings():
 	try:
 		lines = open(STATE['settingsfile'],'r')
 	except IOError:
-		print LOCALE['ioerror'] % (STATE['settingsfile'],'reading')
+		print LOCALE['ioerror'] % (CONFIG['settingsfile'],'reading')
+		sys.exit(1)
 	else:
 		# loop through it
 		for line in lines:
