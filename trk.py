@@ -178,7 +178,7 @@ def hi(string,color):
 
 	# conky highlighting
 	if CONFIG['hi_style']=='conky':
-		return "${color%d}%s${color}" % (color%9,string)
+		return "${color%d}%s${color}" % (color%10,string)
 
 	# xterm highlighting
 	elif CONFIG['hi_style']=='xterm':
