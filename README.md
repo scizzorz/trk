@@ -76,6 +76,7 @@ Edit a task:
 
 `config = ~/.trkrc`  
 the default configuration file
+
 `id_size = 4`  
 the string length for each task's unique identifier
 
