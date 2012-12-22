@@ -250,7 +250,8 @@ def readLines(filename, match='',regex=None):
 		
 
 		loc = ('numlines','numlines_single')[count==1];
-		if CONFIG['show_count']: print LOCALE[loc] % hi(count,CONFIG['hi_priority'])
+		if CONFIG['show_count']:
+			print (' '*(int(CONFIG['id_size'])+3))+(LOCALE[loc] % hi(count,CONFIG['hi_priority']))
 
 def countMatches(filename,match=''):
 	try:
