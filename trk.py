@@ -51,12 +51,12 @@ STATE['settingsfile']="%s/%s" % (expanduser("~"),".trkrc")
 LOCALE=dict()
 LOCALE['ioerror']="Unable to open file '%s' for %s"
 LOCALE['marked'] = 'Marked as done: %s'
-LOCALE['saved'] = 'Saved new line: %s'
-LOCALE['added'] = 'Added new line: %s'
-LOCALE['numlines'] = '%s lines'
-LOCALE['numlines_single'] = '%s line'
-LOCALE['label'] = '%s %s lines'
-LOCALE['label_single'] = '%s %s line'
+LOCALE['saved'] = 'Saved new item: %s'
+LOCALE['added'] = 'Added new item: %s'
+LOCALE['numlines'] = '%s items'
+LOCALE['numlines_single'] = '%s item'
+LOCALE['label'] = '%s %s items'
+LOCALE['label_single'] = '%s %s item'
 LOCALE['everything'] = 'everything else'
 
 # RegExes used to highlight colors
