@@ -51,8 +51,6 @@ CONFIG['markcmd']=''
 
 # state tracking
 STATE=dict()
-STATE['show_id']=True
-STATE['magic_indent']=True
 STATE['indent']=0
 
 
@@ -273,9 +271,7 @@ def countMatches(filename,match=''):
 		lines=[line for line in temp if line.strip()]
 		temp.close()
 
-
 		counts=dict()
-
 
 		for line in lines:
 			res=match.search(line)
@@ -301,17 +297,11 @@ def countMatches(filename,match=''):
 		sortable.sort(key=K)
 
 		for line in sortable:
-			STATE['show_id']=False
-			STATE['magic_indent']=False
 			if RE_DONE.search(line)!=None: # this group is completed, don't list fancy infos
-				print formatLine(line)
-				STATE['show_id']=True
-				STATE['magic_indent']=True
+				print formatLine(line,magic_indent=False,show_id=False)
 			else: # list fancy infos
 				loc = ('label','label_single')[counts[line][0]==1];
-				print formatLine(LOCALE[loc] % (line,hi(counts[line][0],CONFIG['hi_priority'])))
-				STATE['show_id']=True
-				STATE['magic_indent']=True
+				print formatLine(LOCALE[loc] % (line, hi(counts[line][0], CONFIG['hi_priority'])), magic_indent=False, show_id=False)
 
 				# save the show_count setting and indent output
 				STATE['show_count']=CONFIG['show_count']
@@ -320,7 +310,6 @@ def countMatches(filename,match=''):
 
 				# print
 				if line==LOCALE['everything']:
-					#readLines(filename,'se(%s) and xre(^x\s*)' % match,'eval')
 					main(['eval','xre("%s") and xre("^x\s*")' % match.pattern])
 				else:
 					readLines(filename,line,'wipe')
@@ -330,7 +319,7 @@ def countMatches(filename,match=''):
 				STATE['indent']-=1
 
 # format a line for printing
-def formatLine(line,preid=None):
+def formatLine(line, preid=None, magic_indent=True, show_id=True):
 	line=line.strip()
 	preColorLine=line
 
@@ -354,12 +343,12 @@ def formatLine(line,preid=None):
 	if RE_DONE.search(line)!=None:
 		line=RE_DONE.sub('',line)
 		line=hi("x",CONFIG['hi_done'])+" "+priority+line.strip()
-	elif STATE['magic_indent']:
+	elif magic_indent:
 		line="  "+priority+line.strip()
 	else:
 		line=priority+line.strip()
 
-	if STATE['show_id']:
+	if show_id:
 		if preid==None:
 			preid=lineid(preColorLine)	
 		return "%s%s %s" % (STATE['indent']*CONFIG['indent'],hi(preid,CONFIG['hi_id']),line)
