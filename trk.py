@@ -43,6 +43,11 @@ CONFIG['show_count']=True
 # a config file...
 CONFIG['indent']='   '
 
+# debating use
+CONFIG['writecmd']=''
+CONFIG['editcmd']=''
+CONFIG['markcmd']=''
+
 
 # state tracking
 STATE=dict()
@@ -268,6 +273,7 @@ def countMatches(filename,match=''):
 		lines=[line for line in temp if line.strip()]
 		temp.close()
 
+
 		counts=dict()
 
 
@@ -371,6 +377,7 @@ def writeLine(filename,line):
 		print LOCALE['added'] % formatLine(line)
 		temp.write('%s\n' % line)
 		temp.close()
+
 
 # mark lines as complete
 # also used to edit lines
@@ -479,10 +486,12 @@ def main(argv):
 		elif cmd in ('x','finish','complete','hide'):
 			for task in argv[1:]:
 				markLines(filename,task)
+			os.system(CONFIG['markcmd'])
 
 		elif cmd in ('edit','ed'):
 			for task in argv[1:]:
 				markLines(filename,task,True)
+			os.system(CONFIG['editcmd'])
 
 		elif cmd in ('se','fi','search','find'):
 			task=argv[1]
@@ -499,6 +508,7 @@ def main(argv):
 		elif cmd in ('add'):
 			for task in argv[1:]:
 				writeLine(filename,task)
+			os.system(CONFIG['writecmd'])
 
 		elif cmd in ('eval','es','ev'):
 			task=argv[1]
@@ -535,6 +545,7 @@ def main(argv):
 
 		else: # no alias
 			writeLine(filename,task)
+			os.system(CONFIG['writecmd'])
 
 	else: # no arguments
 		main(['xregex','^x\s*'])
