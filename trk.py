@@ -274,23 +274,27 @@ def countMatches(filename,match=''):
 		counts=dict()
 
 		for line in lines:
-			res=match.search(line)
-			if res!=None:
-				label=res.group(2)
-			else:
+			res=match.findall(line)
+			if len(res)==0:
 				label=LOCALE['everything']
 
-			if label not in counts: # label hasn't been encountered yet
-				counts[label]=[0,0]
+				if label not in counts:
+					counts[label] = 0
+				if RE_DONE.search(line) == None:
+					counts[label] += 1
 
-			if RE_DONE.search(line)==None: # task isn't done
-				counts[label][0]+=1
-			else: # task is done
-				counts[label][1]+=1
+			else:
+				for i in res:
+					label=i[1]
+
+					if label not in counts: # label hasn't been encountered yet
+						counts[label]=0
+					if RE_DONE.search(line)==None: # task isn't done
+						counts[label]+=1
 
 		sortable=list()
 		for label in counts:
-			if counts[label][0]!=0:
+			if counts[label]!=0:
 				temp = label
 				sortable.append(temp)
 
@@ -300,8 +304,8 @@ def countMatches(filename,match=''):
 			if RE_DONE.search(line)!=None: # this group is completed, don't list fancy infos
 				print formatLine(line,magic_indent=False,show_id=False)
 			else: # list fancy infos
-				loc = ('label','label_single')[counts[line][0]==1];
-				print formatLine(LOCALE[loc] % (line, hi(counts[line][0], CONFIG['hi_priority'])), magic_indent=False, show_id=False)
+				loc = ('label','label_single')[counts[line]==1];
+				print formatLine(LOCALE[loc] % (line, hi(counts[line], CONFIG['hi_priority'])), magic_indent=False, show_id=False)
 
 				# save the show_count setting and indent output
 				STATE['show_count']=CONFIG['show_count']
