@@ -4,71 +4,71 @@ A nice little command-line interface for organizing tasks and small notes.
 
 ## Usage
 
-Add a new task (alias for `trk.py add "task"`):
+Add a new task (alias for `./trk.py add "task"`):
 
-	trk.py "task"
+	./trk.py "task"
 
 Add multiple new tasks:
 
-	trk.py add "task1" "task2"
+	./trk.py add "task1" "task2"
 
 Complete a task:
 
-	trk.py x|finish|complete|hide "taskid"
+	./trk.py x|finish|complete|hide "taskid"
 
-List tasks (alias for `trk.py xregex "^x\s*"`):
+List tasks (alias for `./trk.py xregex "^x\s*"`):
 
-	trk.py
+	./trk.py
 
 List all tasks:
 
-	trk.py all
+	./trk.py all
 
 List all projects:
 
-	trk.py projects|proj|prj|+
+	./trk.py projects|proj|prj|+
 
 List all contexts:
 
-	trk.py contexts|cont|ctx|@
+	./trk.py contexts|cont|ctx|@
 
-List completed tasks (alias for `trk.py regex "^x\s*"`):
+List completed tasks (alias for `./trk.py regex "^x\s*"`):
 
-	trk.py x|completed|finished|hidden
+	./trk.py x|completed|finished|hidden
 
-List tasks assigned to a +project (alias for `trk.py eval "se('+project') and xre('^x\s*')"`):
+List tasks assigned to a +project (alias for `./trk.py eval "se('+project') and xre('^x\s*')"`):
 
-	trk.py +project
+	./trk.py +project
 
-List tasks assigned to a @context (alias for `trk.py eval "se('@context') and xre('^x\s*')"`):
+List tasks assigned to a @context (alias for `./trk.py eval "se('@context') and xre('^x\s*')"`):
 
-	trk.py @context
+	./trk.py @context
 
-List tasks given a priority (alias for `trk.py eval "se('(#)') and xre('^x\s*')"`):
+List tasks given a priority (alias for `./trk.py eval "se('(#)') and xre('^x\s*')"`):
 
-	trk.py #
+	./trk.py #
 
 Search tasks:
 
-	trk.py search|find|se|fi "search term"
+	./trk.py search|find|se|fi "search term"
 
 Search tasks with regex:
 
-	trk.py regex|re "pattern"
+	./trk.py regex|re "pattern"
 
 Search tasks with exclusive regex (ie every task that *doesn't* match the pattern):
 
-	trk.py xregex|xre "pattern"
+	./trk.py xregex|xre "pattern"
 
 Search tasks with an `eval`:  
 *(`se(string)`, `re(string)`, and `xre(string)` are shorthand for their respective `trk` commands)*  
-*(eg `trk.py eval "se('text')"` is the same as `trk.py search text`)*
+*(eg `./trk.py eval "se('text')"` is the same as `./trk.py search text`)*
 
-	trk.py eval|ev|es "eval"
+	./trk.py eval|ev|es "eval"
 
 Edit a task:
 
-	trk.py edit|ed "taskid"
+	./trk.py edit|ed "taskid"
 
 ## Settings
 
@@ -114,7 +114,7 @@ the text editor used to edit tasks
 show the number of tasks at the end of each output or not
 
 `alias_XXX = YYY`  
-allows you to create custom aliases. Expands `trk.py XXX` into `trk.py eval YYY`. Can also use arguments, eg `alias_r = re('%s')` will cause `trk.py r ^x` to expand to `trk.py eval "re('^x')"`
+allows you to create custom aliases. Expands `./trk.py XXX` into `./trk.py eval YYY`. Can also use arguments, eg `alias_r = re('%s')` will cause `./trk.py r ^x` to expand to `./trk.py eval "re('^x')"`
 
 ## Basic system
 
