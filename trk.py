@@ -38,6 +38,9 @@ CONFIG['editor']='vim'
 # show tasks count at the end or not?
 CONFIG['show_count']=True
 
+# save tasks to the file after they've been marked?
+CONFIG['save_marked']=True
+
 # what character to use for indents
 # how the heck do you change this in
 # a config file...
@@ -58,6 +61,7 @@ STATE['indent']=0
 LOCALE=dict()
 LOCALE['ioerror']="Unable to open file '%s' for %s"
 LOCALE['marked'] = 'Marked as done: %s'
+LOCALE['deleted'] = 'Deleted: %s'
 LOCALE['saved'] = 'Saved new item: %s'
 LOCALE['added'] = 'Added new item: %s'
 LOCALE['numlines'] = '%s items'
@@ -402,8 +406,11 @@ def markLines(filename,match='',edit=None):
 
 			# if we're just marking it, we need to make sure it's not already marked
 			elif match in lineid(line) and RE_DONE.search(line)==None:
-				temp.write('x %s\n' % line)
-				print LOCALE['marked'] % formatLine(line)
+				if CONFIG['save_marked']:
+					temp.write('x %s\n' % line)
+					print LOCALE['marked'] % formatLine(line)
+				else:
+					print LOCALE['deleted'] % formatLine(line)
 
 			# none
 			else:
@@ -434,6 +441,11 @@ def editLine(line):
 	
 	# return new text
 	return t
+
+def editFile(filename):
+	# open the file in the editor
+	os.system("%s \"%s\"" % (CONFIG['editor'],filename))
+
 
 def cmdsettings(argv):
 	configs = list()
@@ -546,6 +558,10 @@ def main(argv):
 
 		elif task in ('contexts','cont','ctx','@'):
 			countMatches(filename,RE_CONTEXT)
+
+		elif task in ('edit','ed'):
+			editFile(filename)
+			os.system(CONFIG['editcmd'])
 
 		elif task in ('all'):
 			main(['search',''])

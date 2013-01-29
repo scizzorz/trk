@@ -70,6 +70,9 @@ Edit a task:
 
 	./trk.py edit|ed "taskid"
 
+Edit the whole list:
+	./trk.py edit|ed
+
 ## Settings
 
 `trk` can read its configuration from a file or from command line flags. When writing in a file, put each declaration on its own line and separate the variable from its value with an equals sign. When setting at the command line, each variable's name can be used as a long flag (eg `--config=~/.not-the-default-trkrc`). Here is a list of available options:
@@ -112,6 +115,9 @@ the text editor used to edit tasks
 
 `show_count = True`  
 show the number of tasks at the end of each output or not
+
+`save_marked = True`  
+save marked tasks to the file or erase them completely
 
 `alias_XXX = YYY`  
 allows you to create custom aliases. Expands `./trk.py XXX` into `./trk.py eval YYY`. Can also use arguments, eg `alias_r = re('%s')` will cause `./trk.py r ^x` to expand to `./trk.py eval "re('^x')"`
