@@ -446,6 +446,11 @@ def editFile(filename):
 	# open the file in the editor
 	os.system("%s \"%s\"" % (CONFIG['editor'],filename))
 
+	# sort the file by using markLines
+	# 'Z' can never be part of the line ID,
+	# so it will never match
+	markLines(filename,'Z')
+
 
 def cmdsettings(argv):
 	configs = list()
