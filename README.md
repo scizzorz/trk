@@ -128,7 +128,7 @@ Basic task storage/layout:
 * projects are formatted like this: `+project`
 * subprojects are formatted like this: `+project+subproject`
 * contexts are formatted like this: `@context`
-* subcontexts are formatted like this: `@context+subcontext`
+* subcontexts are formatted like this: `@context@subcontext`
 * finished tasks are formatted like this: `x task` (the lowercase x *must* be the first character and *must* be followed by a space!)
 * ideally it should only be one priority / date / time per task, but we'll see if I do anything to enforce that
 * no limit to number of projects / contexts a task can have
