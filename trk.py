@@ -443,7 +443,14 @@ def cmdsettings(argv):
 	options, remainder = getopt.getopt(argv,'',configs)
 
 	for opt, arg in options:
-		CONFIG[opt[2:]] = arg
+		if arg.isdigit():
+			CONFIG[opt[2:]] = int(arg)
+		elif arg.lower() == 'true':
+			CONFIG[opt[2:]] = True
+		elif arg.lower() == 'false':
+			CONFIG[opt[2:]] = False
+		else:
+			CONFIG[opt[2:]] = arg
 
 	return remainder
 
@@ -462,7 +469,14 @@ def settings():
 			
 			# set the configuration option!
 			if match!=None:
-				CONFIG[match.group(1)] = match.group(2)
+				if match.group(2).isdigit():
+					CONFIG[match.group(1)] = int(match.group(2))
+				elif match.group(2).lower() == 'true':
+					CONFIG[match.group(1)] = True
+				elif match.group(2).lower() == 'false':
+					CONFIG[match.group(1)] = False
+				else:
+					CONFIG[match.group(1)] = match.group(2)
 		lines.close()
 
 
