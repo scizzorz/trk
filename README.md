@@ -16,7 +16,7 @@ Complete a task:
 
 	./trk.py x|finish|complete|hide "taskid"
 
-List tasks (alias for `./trk.py xregex "^x\s*"`):
+List tasks (alias for `./trk.py all`):
 
 	./trk.py
 
@@ -32,19 +32,15 @@ List all contexts:
 
 	./trk.py contexts|cont|ctx|@
 
-List completed tasks (alias for `./trk.py regex "^x\s*"`):
-
-	./trk.py x|completed|finished|hidden
-
-List tasks assigned to a +project (alias for `./trk.py eval "se('+project') and xre('^x\s*')"`):
+List tasks assigned to a +project (alias for `./trk.py search "+project"`):
 
 	./trk.py +project
 
-List tasks assigned to a @context (alias for `./trk.py eval "se('@context') and xre('^x\s*')"`):
+List tasks assigned to a @context (alias for `./trk.py search "@context"`):
 
 	./trk.py @context
 
-List tasks given a priority (alias for `./trk.py eval "se('(#)') and xre('^x\s*')"`):
+List tasks given a priority (alias for `./trk.py search "(#)"`):
 
 	./trk.py #
 
@@ -107,9 +103,6 @@ the palette color for highlighting task identifiers
 `hi_overdue = 9`  
 ...tasks due dates that are overdue
 
-`hi_done = 9`  
-...task completion checkmarks
-
 `priority_char = !`  
 the character used to represent priority
 
@@ -118,9 +111,6 @@ the text editor used to edit tasks
 
 `show_count = True`  
 show the number of tasks at the end of each output or not
-
-`save_marked = True`  
-save marked tasks to the file or erase them completely
 
 `alias_XXX = YYY`  
 allows you to create custom aliases. Expands `./trk.py XXX` into `./trk.py eval YYY`. Can also use arguments, eg `alias_r = re('%s')` will cause `./trk.py r ^x` to expand to `./trk.py eval "re('^x')"`
@@ -138,7 +128,7 @@ Basic task storage/layout:
 * subprojects are formatted like this: `+project+subproject`
 * contexts are formatted like this: `@context`
 * subcontexts are formatted like this: `@context@subcontext`
-* finished tasks are formatted like this: `x task` (the lowercase x *must* be the first character and *must* be followed by a space!)
+* finished tasks deleted immediately
 * ideally it should only be one priority / date / time per task, but we'll see if I do anything to enforce that
 * no limit to number of projects / contexts a task can have
 

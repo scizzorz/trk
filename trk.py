@@ -28,7 +28,7 @@ CONFIG['hi_context']=10
 CONFIG['hi_priority']=9
 CONFIG['hi_due']=14
 CONFIG['hi_overdue']=9
-CONFIG['hi_done']=9
+CONFIG['hi_count']=7
 
 # which character to use for priority
 CONFIG['priority_char']='!'
@@ -38,9 +38,6 @@ CONFIG['editor']='vim'
 
 # show tasks count at the end or not?
 CONFIG['show_count']=True
-
-# save tasks to the file after they've been marked?
-CONFIG['save_marked']=True
 
 # what character to use for indents
 # how the heck do you change this in
@@ -76,7 +73,6 @@ RE_PROJECT=re.compile(r'(^|\s)(\+[\w\+]+)')
 RE_CONTEXT=re.compile(r'(^|\s)(\@[\w\@]+)')
 RE_PRIORITY=re.compile(r'\s*(\((\d)\))\s*')
 RE_DUE=re.compile(r'(\[(\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*\])')
-RE_DONE=re.compile(r'(^x\s*)')
 RE_WHITESPACE=re.compile(r'\s+')
 
 RE_SETTING=re.compile(r'(\w+)\s*\=\s*(.*)')
@@ -113,17 +109,7 @@ def linecmp(a,b):
 	# if a < b, return +
 	# if a = b, return 0
 
-	# doneness
-
-	doneMatchA = RE_DONE.search(a)
-	doneMatchB = RE_DONE.search(b)
-	if doneMatchA!=None and doneMatchB==None:
-		return 1
-	elif doneMatchA==None and doneMatchB!=None:
-		return -1
-
 	# priority
-
 	priorityMatchA = RE_PRIORITY.search(a)
 	priorityMatchB = RE_PRIORITY.search(b)
 	if priorityMatchA == None and priorityMatchB != None:
@@ -174,7 +160,6 @@ class K(object):
 # computes the md5 task id of a line
 def lineid(line):
 	line=line.strip()
-	line=RE_DONE.sub('',line)
 	return md5.new(line).hexdigest()[0:int(CONFIG['id_size'])]
 
 # highlights a string with the given color
@@ -241,7 +226,7 @@ def readLines(filename, match='',regex=None):
 			match=match.replace('re(','eval_r(line,')
 
 		for line in lines:
-			if regex=='wipe' and match in line and RE_DONE.search(line)==None:
+			if regex=='wipe' and match in line:
 				print formatLine(line.replace(match,''),lineid(line))
 				count+=1
 			elif regex=='eval' and eval(match):
@@ -260,7 +245,7 @@ def readLines(filename, match='',regex=None):
 
 		loc = ('numlines','numlines_single')[count==1];
 		if CONFIG['show_count']:
-			print (' '*(int(CONFIG['id_size'])+3))+(LOCALE[loc] % hi(count,CONFIG['hi_priority']))
+			print hi((' '*(int(CONFIG['id_size'])+1))+(LOCALE[loc] % count), CONFIG['hi_count'])
 
 def countMatches(filename,match=''):
 	try:
@@ -279,10 +264,10 @@ def countMatches(filename,match=''):
 			if len(res)==0:
 				label=LOCALE['everything']
 
-				if label not in counts:
+				if label not in counts: # label hasn't been encountered yet
 					counts[label] = 0
-				if RE_DONE.search(line) == None:
-					counts[label] += 1
+
+				counts[label] += 1
 
 			else:
 				for i in res:
@@ -290,8 +275,8 @@ def countMatches(filename,match=''):
 
 					if label not in counts: # label hasn't been encountered yet
 						counts[label]=0
-					if RE_DONE.search(line)==None: # task isn't done
-						counts[label]+=1
+
+					counts[label]+=1
 
 		sortable=list()
 		for label in counts:
@@ -302,26 +287,24 @@ def countMatches(filename,match=''):
 		sortable.sort(key=K)
 
 		for line in sortable:
-			if RE_DONE.search(line)!=None: # this group is completed, don't list fancy infos
-				print formatLine(line,magic_indent=False,show_id=False)
-			else: # list fancy infos
-				loc = ('label','label_single')[counts[line]==1];
-				print formatLine(LOCALE[loc] % (line, hi(counts[line], CONFIG['hi_priority'])), magic_indent=False, show_id=False)
+			# list fancy infos
+			loc = ('label','label_single')[counts[line]==1];
+			print formatLine(LOCALE[loc] % (line, hi(counts[line], CONFIG['hi_priority'])), magic_indent=False, show_id=False)
 
-				# save the show_count setting and indent output
-				STATE['show_count']=CONFIG['show_count']
-				CONFIG['show_count']=False
-				STATE['indent']+=1
+			# save the show_count setting and indent output
+			STATE['show_count']=CONFIG['show_count']
+			CONFIG['show_count']=False
+			STATE['indent']+=1
 
-				# print
-				if line==LOCALE['everything']:
-					main(['eval','xre("%s") and xre("^x\s*")' % match.pattern])
-				else:
-					readLines(filename,line,'wipe')
+			# print
+			if line==LOCALE['everything']:
+				main(['eval','xre("%s")' % match.pattern])
+			else:
+				readLines(filename,line,'wipe')
 
-				# restore things
-				CONFIG['show_count']=STATE['show_count']
-				STATE['indent']-=1
+			# restore things
+			CONFIG['show_count']=STATE['show_count']
+			STATE['indent']-=1
 
 # format a line for printing
 def formatLine(line, preid=None, magic_indent=True, show_id=True):
@@ -344,14 +327,8 @@ def formatLine(line, preid=None, magic_indent=True, show_id=True):
 	line=RE_PRIORITY.sub('',line)
 	line=RE_DUE.sub(formatDate,line)
 
-	# print them so they're aligned nicely
-	if RE_DONE.search(line)!=None:
-		line=RE_DONE.sub('',line)
-		line=hi("x",CONFIG['hi_done'])+" "+priority+line.strip()
-	elif magic_indent:
-		line="  "+priority+line.strip()
-	else:
-		line=priority+line.strip()
+	# print them with priority
+	line=priority+line.strip()
 
 	if show_id:
 		if preid==None:
@@ -396,18 +373,14 @@ def markLines(filename,match='',edit=None):
 			line=line.strip()
 
 			# if we're editing, we don't care if it's done or not
-			if edit and match in lineid(line):
+			if match in lineid(line) and edit:
 				line=editLine(line)
 				temp.write('%s\n' % line)
 				print LOCALE['saved'] % formatLine(line)
 
-			# if we're just marking it, we need to make sure it's not already marked
-			elif match in lineid(line) and RE_DONE.search(line)==None:
-				if CONFIG['save_marked']:
-					temp.write('x %s\n' % line)
-					print LOCALE['marked'] % formatLine(line)
-				else:
-					print LOCALE['deleted'] % formatLine(line)
+			# we're deleting it
+			elif match in lineid(line):
+				print LOCALE['deleted'] % formatLine(line)
 
 			# none
 			else:
@@ -539,20 +512,17 @@ def main(argv):
 
 		# user-defined aliases are evaluated first if the user decides they hate mine
 		# and want to override them with their own
-		if ('alias_'+task) in CONFIG: 
+		if ('alias_'+task) in CONFIG:
 			main(['eval',CONFIG['alias_'+task]])
 
 		elif task[0]=='@' and ' ' not in task and len(task)>1:
-			main(['eval','se("%s") and xre("^x\s*")' % task])
+			readLines(filename, task)
 
 		elif task[0]=='+' and ' ' not in task and len(task)>1:
-			main(['eval','se("%s") and xre("^x\s*")' % task])
+			readLines(filename, task)
 
 		elif task[0] in ('0','1','2','3','4','5','6','7','8','9'):
-			main(['eval','se("(%s)") and xre("^x\s*")' % task])
-
-		elif task in ('x','completed','finished','hidden'):
-			main(['regex','^x\s*'])
+			readLines(filename,'(%s)' % task)
 
 		elif task in ('projects','proj','prj','+'):
 			countMatches(filename,RE_PROJECT)
@@ -565,14 +535,14 @@ def main(argv):
 			os.system(CONFIG['editcmd'])
 
 		elif task in ('all'):
-			main(['search',''])
+			readLines(filename)
 
 		else: # no alias
 			writeLine(filename,task)
 			os.system(CONFIG['writecmd'])
 
 	else: # no arguments
-		main(['xregex','^x\s*'])
+		readLines(filename)
 
 if __name__=='__main__':
 	argv = cmdsettings(sys.argv[1:])
