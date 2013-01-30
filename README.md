@@ -104,6 +104,9 @@ the palette color for highlighting task identifiers
 `hi_due = 14`  
 ...task due dates
 
+`hi_overdue = 9`  
+...tasks due dates that are overdue
+
 `hi_done = 9`  
 ...task completion checkmarks
 

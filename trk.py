@@ -27,6 +27,7 @@ CONFIG['hi_project']=11
 CONFIG['hi_context']=10
 CONFIG['hi_priority']=9
 CONFIG['hi_due']=14
+CONFIG['hi_overdue']=9
 CONFIG['hi_done']=9
 
 # which character to use for priority
@@ -199,15 +200,18 @@ def formatDate(obj):
 	ret = '%s/%s' % (obj.group(2),obj.group(3))
 	if obj.group(5)!=None: # year
 		ret += '/'+obj.group(5)
-	
+
 	if obj.group(7)!=None: # hour / time
 		ret += ' '+obj.group(7)
 		if obj.group(8)!=None: # minutes
 			ret += obj.group(8)
 		if obj.group(10)!=None: # am/pm
 			ret += obj.group(10)
-	
-	return hi(ret,CONFIG['hi_due'])
+
+	if dateToUnix('['+ret+']') < time.time():
+		return hi(ret, CONFIG['hi_overdue'])
+	else:
+		return hi(ret, CONFIG['hi_due'])
 
 # eval shortcuts
 def eval_s(line,match=''):
@@ -252,7 +256,7 @@ def readLines(filename, match='',regex=None):
 			elif regex==None and match in line:
 				print formatLine(line)
 				count+=1
-		
+
 
 		loc = ('numlines','numlines_single')[count==1];
 		if CONFIG['show_count']:
@@ -351,7 +355,7 @@ def formatLine(line, preid=None, magic_indent=True, show_id=True):
 
 	if show_id:
 		if preid==None:
-			preid=lineid(preColorLine)	
+			preid=lineid(preColorLine)
 		return "%s%s %s" % (STATE['indent']*CONFIG['indent'],hi(preid,CONFIG['hi_id']),line)
 	else:
 		return "%s%s" % (STATE['indent']*CONFIG['indent'],line)
@@ -381,7 +385,7 @@ def markLines(filename,match='',edit=None):
 		lines=[line for line in temp if line.strip()]
 		lines.sort(key=K)
 		temp.close()
-	
+
 	try:
 		temp=open(filename,'w+')
 	except IOError:
@@ -444,7 +448,6 @@ def editFile(filename):
 	# so it will never match
 	markLines(filename,'Z')
 
-
 def cmdsettings(argv):
 	configs = list()
 	for key in CONFIG:
@@ -476,7 +479,7 @@ def settings():
 		for line in lines:
 			# if it matches our settings regex
 			match=RE_SETTING.search(line)
-			
+
 			# set the configuration option!
 			if match!=None:
 				if match.group(2).isdigit():
