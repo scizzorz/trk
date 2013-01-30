@@ -288,8 +288,9 @@ def countMatches(filename,match=''):
 
 		for line in sortable:
 			# list fancy infos
-			loc = ('label','label_single')[counts[line]==1];
-			print formatLine(LOCALE[loc] % (line, hi(counts[line], CONFIG['hi_priority'])), magic_indent=False, show_id=False)
+			loc = ('numlines','numlines_single')[counts[line]==1];
+			#print formatLine(LOCALE[loc] % (line, hi(counts[line], CONFIG['hi_priority'])), show_id=False)
+			print formatLine(line + ' ' + hi(LOCALE[loc] % counts[line], CONFIG['hi_count']), show_id=False)
 
 			# save the show_count setting and indent output
 			STATE['show_count']=CONFIG['show_count']
@@ -307,7 +308,7 @@ def countMatches(filename,match=''):
 			STATE['indent']-=1
 
 # format a line for printing
-def formatLine(line, preid=None, magic_indent=True, show_id=True):
+def formatLine(line, preid=None, show_id=True):
 	line=line.strip()
 	preColorLine=line
 
