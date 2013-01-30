@@ -80,6 +80,32 @@ RE_WHITESPACE=re.compile(r'\s+')
 
 RE_SETTING=re.compile(r'(\w+)\s*\=\s*(.*)')
 
+def dateToUnix(datestring):
+	match = RE_DUE.search(datestring)
+
+	# convert match into a sortable Unix time
+	if match != None:
+		month=match.group(2)
+		day=match.group(3)
+
+		year=match.group(5) or time.strftime("%Y",time.gmtime())
+		if len(year)==3:
+			year=time.strftime("%Y",time.gmtime())
+		elif len(year)==2:
+			year="20"+year
+
+		hour=match.group(7) or "12"
+		minute=match.group(9) or "00"
+
+		pam = match.group(10) or 'am'
+		pam = pam.upper()
+
+		unix = time.mktime(time.strptime("%s %s %s %s %s %s" % (month,day,year,hour,minute,pam),"%m %d %Y %I %M %p"))
+	else:
+		unix = None
+
+	return unix
+
 def linecmp(a,b):
 	# these look backwards to me but they work...
 	# if a > b, return -
@@ -110,48 +136,15 @@ def linecmp(a,b):
 
 
 	# dates
-	
-	dateMatchA = RE_DUE.search(a)
-	dateMatchB = RE_DUE.search(b)
+	timeA = dateToUnix(a)
+	timeB = dateToUnix(b)
 
-	# convert dateMatchA into a sortable Unix time
-	if dateMatchA != None:
-		monthA=dateMatchA.group(2)
-		dayA=dateMatchA.group(3)
-		yearA=dateMatchA.group(5) or time.strftime("%Y",time.gmtime())
-		if len(yearA)==3:
-			yearA=time.strftime("%Y",time.gmtime())
-		elif len(yearA)==2:
-			yearA="20"+yearA
-		hourA=dateMatchA.group(7) or "12"
-		minuteA=dateMatchA.group(9) or "00"
-		pamA = dateMatchA.group(10) or 'am'
-		pamA = pamA.upper()
-
-		timeA=time.mktime(time.strptime("%s %s %s %s %s %s" % (monthA,dayA,yearA,hourA,minuteA,pamA),"%m %d %Y %I %M %p"))
-
-	# convert dateMatchB into a sortable Unix time
-	if dateMatchB != None:
-		monthB=dateMatchB.group(2)
-		dayB=dateMatchB.group(3)
-		yearB=dateMatchB.group(5) or time.strftime("%Y",time.gmtime())
-		if len(yearB)==3:
-			yearB=time.strftime("%Y",time.gmtime())
-		elif len(yearB)==2:
-			yearB="20"+yearB
-		hourB=dateMatchB.group(7) or "12"
-		minuteB=dateMatchB.group(9) or "00"
-		pamB = dateMatchB.group(10) or 'am'
-		pamB = pamB.upper()
-
-		timeB=time.mktime(time.strptime("%s %s %s %s %s %s" % (monthB,dayB,yearB,hourB,minuteB,pamB),"%m %d %Y %I %M %p"))
-	
 	# sort dateMatches
-	if dateMatchA == None and dateMatchB != None:
+	if timeA == None and timeB != None:
 		return 1
-	elif dateMatchA != None and dateMatchB == None:
+	elif timeA != None and timeB == None:
 		return -1
-	elif dateMatchA != None and dateMatchB != None:
+	elif timeA != None and timeB != None:
 		ret=timeB - timeA
 		if ret!=0:
 			return -ret/abs(ret)
