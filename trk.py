@@ -198,115 +198,6 @@ def formatDate(obj):
 	else:
 		return hi(ret, CONFIG['hi_due'])
 
-# eval shortcuts
-def eval_s(line,match=''):
-	return match in line
-def eval_r(line,match=''):
-	return re.search(match,line)!=None
-def eval_x(line,match=''):
-	return re.search(match,line)==None
-
-# read tasks
-def readLines(filename, match='',regex=None):
-	count = 0
-
-	try:
-		temp=open(filename,'r+')
-	except IOError:
-		print LOCALE['ioerror'] % (filename,'reading')
-		sys.exit(1)
-	else:
-		lines=[line for line in temp if line.strip()]
-		lines.sort(key=K)
-		temp.close()
-
-		if regex=='eval':
-			match=match.replace('se(','eval_s(line,')
-			match=match.replace('xre(','eval_x(line,')
-			match=match.replace('re(','eval_r(line,')
-
-		for line in lines:
-			if regex=='wipe' and match in line:
-				print formatLine(line.replace(match,''),lineid(line))
-				count+=1
-			elif regex=='eval' and eval(match):
-				print formatLine(line)
-				count+=1
-			elif regex=="re" and re.search(match,line)!=None:
-				print formatLine(line)
-				count+=1
-			elif regex=="xre" and re.search(match,line)==None:
-				print formatLine(line)
-				count+=1
-			elif regex==None and match in line:
-				print formatLine(line)
-				count+=1
-
-
-		loc = ('numlines','numlines_single')[count==1];
-		if CONFIG['show_count']:
-			print hi((' '*(int(CONFIG['id_size'])+1))+(LOCALE[loc] % count), CONFIG['hi_count'])
-
-def countMatches(filename,match=''):
-	try:
-		temp = open(filename,'r+')
-	except IOError:
-		print LOCALE['ioerror'] % (filename,'reading')
-		sys.exit(1)
-	else:
-		lines=[line for line in temp if line.strip()]
-		temp.close()
-
-		counts=dict()
-
-		for line in lines:
-			res=match.findall(line)
-			if len(res)==0:
-				label=LOCALE['everything']
-
-				if label not in counts: # label hasn't been encountered yet
-					counts[label] = 0
-
-				counts[label] += 1
-
-			else:
-				for i in res:
-					label=i[1]
-
-					if label not in counts: # label hasn't been encountered yet
-						counts[label]=0
-
-					counts[label]+=1
-
-		sortable=list()
-		for label in counts:
-			if counts[label]!=0:
-				temp = label
-				sortable.append(temp)
-
-		sortable.sort(key=K)
-
-		for line in sortable:
-			# list fancy infos
-			loc = ('numlines','numlines_single')[counts[line]==1];
-			#print formatLine(LOCALE[loc] % (line, hi(counts[line], CONFIG['hi_priority'])), show_id=False)
-			print formatLine(line + ' ' + hi(LOCALE[loc] % counts[line], CONFIG['hi_count']), show_id=False)
-
-			# save the show_count setting and indent output
-			STATE['show_count']=CONFIG['show_count']
-			CONFIG['show_count']=False
-			STATE['indent']+=1
-
-			# print
-			if line==LOCALE['everything']:
-				main(['eval','xre("%s")' % match.pattern])
-			else:
-				readLines(filename,line,'wipe')
-
-			# restore things
-			CONFIG['show_count']=STATE['show_count']
-			STATE['indent']-=1
-
 # format a line for printing
 def formatLine(line, preid=None, show_id=True):
 	line=line.strip()
@@ -338,6 +229,113 @@ def formatLine(line, preid=None, show_id=True):
 	else:
 		return "%s%s" % (STATE['indent']*CONFIG['indent'],line)
 
+# eval shortcuts
+def eval_s(line,match=''):
+	return match in line
+def eval_r(line,match=''):
+	return re.search(match,line)!=None
+def eval_x(line,match=''):
+	return re.search(match,line)==None
+
+# read the file and return a list of sorted lines
+def readFile(filename):
+	try:
+		temp = open(filename, 'r+')
+	except IOError:
+		print LOCALE['ioerror'] % (filename, 'reading')
+		return None
+	else:
+		lines = [line for line in temp if line.strip()]
+		lines.sort(key=K)
+		temp.close()
+		return lines
+
+# read tasks
+def readLines(filename, match='',regex=None):
+	count = 0
+
+	lines = readFile(filename)
+
+	if regex=='eval':
+		match=match.replace('se(','eval_s(line,')
+		match=match.replace('xre(','eval_x(line,')
+		match=match.replace('re(','eval_r(line,')
+
+	for line in lines:
+		if regex=='wipe' and match in line:
+			print formatLine(line.replace(match,''),lineid(line))
+			count+=1
+		elif regex=='eval' and eval(match):
+			print formatLine(line)
+			count+=1
+		elif regex=="re" and re.search(match,line)!=None:
+			print formatLine(line)
+			count+=1
+		elif regex=="xre" and re.search(match,line)==None:
+			print formatLine(line)
+			count+=1
+		elif regex==None and match in line:
+			print formatLine(line)
+			count+=1
+
+
+	loc = ('numlines','numlines_single')[count==1];
+	if CONFIG['show_count']:
+		print hi((' '*(int(CONFIG['id_size'])+1))+(LOCALE[loc] % count), CONFIG['hi_count'])
+
+def countMatches(filename,match=''):
+	lines = readFile(filename);
+
+	counts=dict()
+
+	for line in lines:
+		res=match.findall(line)
+		if len(res)==0:
+			label=LOCALE['everything']
+
+			if label not in counts: # label hasn't been encountered yet
+				counts[label] = 0
+
+			counts[label] += 1
+
+		else:
+			for i in res:
+				label=i[1]
+
+				if label not in counts: # label hasn't been encountered yet
+					counts[label]=0
+
+				counts[label]+=1
+
+	sortable=list()
+	for label in counts:
+		if counts[label]!=0:
+			temp = label
+			sortable.append(temp)
+
+	sortable.sort(key=K)
+
+	for line in sortable:
+		# list fancy infos
+		loc = ('numlines','numlines_single')[counts[line]==1];
+		#print formatLine(LOCALE[loc] % (line, hi(counts[line], CONFIG['hi_priority'])), show_id=False)
+		print formatLine(line + ' ' + hi(LOCALE[loc] % counts[line], CONFIG['hi_count']), show_id=False)
+
+		# save the show_count setting and indent output
+		STATE['show_count']=CONFIG['show_count']
+		CONFIG['show_count']=False
+		STATE['indent']+=1
+
+		# print
+		if line==LOCALE['everything']:
+			main(['eval','xre("%s")' % match.pattern])
+		else:
+			readLines(filename,line,'wipe')
+
+		# restore things
+		CONFIG['show_count']=STATE['show_count']
+		STATE['indent']-=1
+
 # write lines to the file
 def writeLine(filename,line):
 	try:
@@ -354,15 +352,7 @@ def writeLine(filename,line):
 # mark lines as complete
 # also used to edit lines
 def markLines(filename,match='',field="id"):
-	try:
-		temp=open(filename,'r+')
-	except IOError:
-		print LOCALE['ioerror'] % (filename,'reading')
-		sys.exit(1)
-	else:
-		lines=[line for line in temp if line.strip()]
-		lines.sort(key=K)
-		temp.close()
+	lines = readFile(filename)
 
 	try:
 		temp=open(filename,'w+')
@@ -388,15 +378,7 @@ def markLines(filename,match='',field="id"):
 		temp.close()
 
 def editLines(filename,match='',field="id"):
-	try:
-		temp=open(filename,'r+')
-	except IOError:
-		print LOCALE['ioerror'] % (filename,'reading')
-		sys.exit(1)
-	else:
-		lines=[line for line in temp if line.strip()]
-		lines.sort(key=K)
-		temp.close()
+	lines = readFile(filename)
 
 	try:
 		temp=open(filename,'w+')
@@ -423,6 +405,8 @@ def editLines(filename,match='',field="id"):
 				temp.write('%s\n' % line)
 		temp.close()
 
+# creates a temporary file and populates it with some text
+# allows the user to edit the text and then returns the new text
 def launchLineEditor(line):
 	# this code is kinda borrowed from Mercurial...
 	t=''
@@ -448,7 +432,8 @@ def launchLineEditor(line):
 	# return new text
 	return t
 
-def editFile(filename):
+# allows the user to edit the entire file at once
+def launchFileEditor(filename):
 	# open the file in the editor
 	os.system("%s \"%s\"" % (CONFIG['editor'],filename))
 
@@ -527,7 +512,7 @@ def main(argv):
 				editLines(filename,task)
 			os.system(CONFIG['editcmd'])
 
-		elif cmd in ('se','fi','search','find'):
+		elif cmd in ('search','find','se','fi','s','f'):
 			task=argv[1]
 			readLines(filename,task)
 
@@ -539,7 +524,7 @@ def main(argv):
 			task=argv[1]
 			readLines(filename,task,'xre')
 
-		elif cmd in ('add'):
+		elif cmd in ('add','a'):
 			for task in argv[1:]:
 				writeLine(filename,task)
 			os.system(CONFIG['writecmd'])
@@ -571,8 +556,8 @@ def main(argv):
 		elif task in ('contexts','cont','ctx','@'):
 			countMatches(filename,RE_CONTEXT)
 
-		elif task in ('edit','ed'):
-			editFile(filename)
+		elif task in ('edit','ed','e'):
+			launchFileEditor(filename)
 			os.system(CONFIG['editcmd'])
 
 		elif task in ('all'):
