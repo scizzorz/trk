@@ -353,7 +353,7 @@ def writeLine(filename,line):
 
 # mark lines as complete
 # also used to edit lines
-def markLines(filename,match='',edit=None,field="id"):
+def markLines(filename,match='',field="id"):
 	try:
 		temp=open(filename,'r+')
 	except IOError:
@@ -378,22 +378,52 @@ def markLines(filename,match='',edit=None,field="id"):
 			elif field=='body':
 				fieldVal = line
 
-			# if we're editing, we don't care if it's done or not
-			if match in fieldVal and edit:
-				line=editLine(line)
-				temp.write('%s\n' % line)
-				print LOCALE['saved'] % formatLine(line)
-
-			# we're deleting it
-			elif match in fieldVal:
+			# delete it
+			if match in fieldVal:
 				print LOCALE['deleted'] % formatLine(line)
 
-			# none
+			# don't delete it
 			else:
 				temp.write('%s\n' % line)
 		temp.close()
 
-def editLine(line):
+def editLines(filename,match='',field="id"):
+	try:
+		temp=open(filename,'r+')
+	except IOError:
+		print LOCALE['ioerror'] % (filename,'reading')
+		sys.exit(1)
+	else:
+		lines=[line for line in temp if line.strip()]
+		lines.sort(key=K)
+		temp.close()
+
+	try:
+		temp=open(filename,'w+')
+	except IOError:
+		print LOCALE['ioerror'] % (filename,'writing')
+		sys.exit(1)
+	else:
+		for line in lines:
+			line=line.strip()
+
+			if field=='id':
+				fieldVal = lineid(line)
+			elif field=='body':
+				fieldVal = line
+
+			# edit it
+			if match in fieldVal:
+				line=launchLineEditor(line)
+				temp.write('%s\n' % line)
+				print LOCALE['saved'] % formatLine(line)
+
+			# don't edit it
+			else:
+				temp.write('%s\n' % line)
+		temp.close()
+
+def launchLineEditor(line):
 	# this code is kinda borrowed from Mercurial...
 	t=''
 
@@ -414,7 +444,7 @@ def editLine(line):
 	finally:
 		# remove the temp file
 		os.unlink(name)
-	
+
 	# return new text
 	return t
 
@@ -494,7 +524,7 @@ def main(argv):
 
 		elif cmd in ('edit','ed'):
 			for task in argv[1:]:
-				markLines(filename,task,edit=True)
+				editLines(filename,task)
 			os.system(CONFIG['editcmd'])
 
 		elif cmd in ('se','fi','search','find'):
