@@ -343,7 +343,7 @@ def countMatches(filename,match=''):
 
 		# print
 		if line==LOCALE['everything']:
-			main(['eval','xre("%s")' % match.pattern])
+			readLines(filename, match.pattern, 'xre')
 		else:
 			readLines(filename,line,'wipe')
 
