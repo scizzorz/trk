@@ -353,7 +353,7 @@ def writeLine(filename,line):
 
 # mark lines as complete
 # also used to edit lines
-def markLines(filename,match='',edit=None):
+def markLines(filename,match='',edit=None,field="id"):
 	try:
 		temp=open(filename,'r+')
 	except IOError:
@@ -373,14 +373,19 @@ def markLines(filename,match='',edit=None):
 		for line in lines:
 			line=line.strip()
 
+			if field=='id':
+				fieldVal = lineid(line)
+			elif field=='body':
+				fieldVal = line
+
 			# if we're editing, we don't care if it's done or not
-			if match in lineid(line) and edit:
+			if match in fieldVal and edit:
 				line=editLine(line)
 				temp.write('%s\n' % line)
 				print LOCALE['saved'] % formatLine(line)
 
 			# we're deleting it
-			elif match in lineid(line):
+			elif match in fieldVal:
 				print LOCALE['deleted'] % formatLine(line)
 
 			# none
@@ -482,9 +487,14 @@ def main(argv):
 				markLines(filename,task)
 			os.system(CONFIG['markcmd'])
 
+		elif cmd in ('xs','xse','xsearch'):
+			for task in argv[1:]:
+				markLines(filename,task,field='body')
+			os.system(CONFIG['markcmd'])
+
 		elif cmd in ('edit','ed'):
 			for task in argv[1:]:
-				markLines(filename,task,True)
+				markLines(filename,task,edit=True)
 			os.system(CONFIG['editcmd'])
 
 		elif cmd in ('se','fi','search','find'):

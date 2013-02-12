@@ -12,9 +12,13 @@ Add multiple new tasks:
 
 	./trk.py add "task1" "task2"
 
-Complete a task:
+Complete a task by task ID:
 
 	./trk.py x|finish|complete|hide "taskid"
+
+Complete a task by task body:
+
+	./trk.py xs|xse|xsearch "search"
 
 List tasks (alias for `./trk.py all`):
 
