@@ -68,6 +68,21 @@ LOCALE['label'] = '%s %s items'
 LOCALE['label_single'] = '%s %s item'
 LOCALE['everything'] = 'everything else'
 
+# command alias dictionary
+ALIAS=dict()
+ALIAS['add'] = ('add','a')
+ALIAS['edit'] = ('edit','ed','e')
+ALIAS['mark'] = ('finish','complete','done','hide','x')
+ALIAS['mark_body'] = ('xsearch','xse','xs')
+
+ALIAS['projects'] = ('projects','proj','prj','+')
+ALIAS['contexts'] = ('contexts','cont','ctx','@')
+ALIAS['list'] = ('all','list','ls')
+ALIAS['search'] = ('search','find','se','fi','s','f')
+ALIAS['regex'] = ('regex','re')
+ALIAS['xregex'] = ('xregex','xre')
+ALIAS['eval'] = ('eval','ev','es')
+
 # RegExes used to highlight colors
 RE_PROJECT=re.compile(r'(^|\s)(\+[\w\+]+)')
 RE_CONTEXT=re.compile(r'(^|\s)(\@[\w\@]+)')
@@ -497,41 +512,37 @@ def main(argv):
 			formatted = CONFIG['alias_'+cmd] % tuple(argv[1:])
 			main(['eval',formatted])
 
-		elif cmd in ('x','finish','complete','hide'):
+		elif cmd in ALIAS['mark']:
 			for task in argv[1:]:
-				markLines(filename,task)
+				markLines(filename, task)
 			os.system(CONFIG['markcmd'])
 
-		elif cmd in ('xs','xse','xsearch'):
+		elif cmd in ALIAS['mark_body']:
 			for task in argv[1:]:
-				markLines(filename,task,field='body')
+				markLines(filename, task, field='body')
 			os.system(CONFIG['markcmd'])
 
-		elif cmd in ('edit','ed'):
+		elif cmd in ALIAS['edit']:
 			for task in argv[1:]:
-				editLines(filename,task)
+				editLines(filename, task)
 			os.system(CONFIG['editcmd'])
 
-		elif cmd in ('search','find','se','fi','s','f'):
-			task=argv[1]
-			readLines(filename,task)
-
-		elif cmd in ('regex','re'):
-			task=argv[1]
-			readLines(filename,task,'re')
-
-		elif cmd in ('xregex','xre'):
-			task=argv[1]
-			readLines(filename,task,'xre')
-
-		elif cmd in ('add','a'):
+		elif cmd in ALIAS['add']:
 			for task in argv[1:]:
-				writeLine(filename,task)
+				writeLine(filename, task)
 			os.system(CONFIG['writecmd'])
 
-		elif cmd in ('eval','es','ev'):
-			task=argv[1]
-			readLines(filename,task,'eval')
+		elif cmd in ALIAS['search']:
+			readLines(filename, argv[1])
+
+		elif cmd in ALIAS['regex']:
+			readLines(filename, argv[1], 're')
+
+		elif cmd in ALIAS['xregex']:
+			readLines(filename, argv[1], 'xre')
+
+		elif cmd in ALIAS['eval']:
+			readLines(filename, argv[1], 'eval')
 
 	elif len(argv)==1: # only one argument, probably an alias
 		task=argv[0]
@@ -550,17 +561,17 @@ def main(argv):
 		elif task[0] in ('0','1','2','3','4','5','6','7','8','9'):
 			readLines(filename,'(%s)' % task)
 
-		elif task in ('projects','proj','prj','+'):
+		elif task in ALIAS['projects']:
 			countMatches(filename,RE_PROJECT)
 
-		elif task in ('contexts','cont','ctx','@'):
+		elif task in ALIAS['contexts']:
 			countMatches(filename,RE_CONTEXT)
 
-		elif task in ('edit','ed','e'):
+		elif task in ALIAS['edit']:
 			launchFileEditor(filename)
 			os.system(CONFIG['editcmd'])
 
-		elif task in ('all'):
+		elif task in ALIAS['list']:
 			readLines(filename)
 
 		else: # no alias
