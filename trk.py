@@ -282,33 +282,27 @@ def readLines(filename, match='',regex=None):
 	if CONFIG['show_count']:
 		print hi((' '*(int(CONFIG['id_size'])+1))+(LOCALE[loc] % count), CONFIG['hi_count'])
 
-def countMatches(filename,match=''):
+def countMatches(filename,match):
 	lines = readFile(filename);
 
 	counts=dict()
 
 	for line in lines:
-		res=match.findall(line)
-		if len(res)==0:
-			label=LOCALE['everything']
+		res = match.findall(line)
+		if len(res) == 0:
+			res = [('',LOCALE['everything'])]
+
+		for i in res:
+			label=i[1]
 
 			if label not in counts: # label hasn't been encountered yet
 				counts[label] = 0
 
 			counts[label] += 1
 
-		else:
-			for i in res:
-				label=i[1]
-
-				if label not in counts: # label hasn't been encountered yet
-					counts[label]=0
-
-				counts[label]+=1
-
 	sortable=list()
 	for label in counts:
-		if counts[label]!=0:
+		if counts[label] != 0:
 			temp = label
 			sortable.append(temp)
 
@@ -316,24 +310,23 @@ def countMatches(filename,match=''):
 
 	for line in sortable:
 		# list fancy infos
-		loc = ('numlines','numlines_single')[counts[line]==1];
-		#print formatLine(LOCALE[loc] % (line, hi(counts[line], CONFIG['hi_priority'])), show_id=False)
+		loc = ('numlines','numlines_single')[counts[line] == 1];
 		print formatLine(line + ' ' + hi(LOCALE[loc] % counts[line], CONFIG['hi_count']), show_id=False)
 
 		# save the show_count setting and indent output
-		STATE['show_count']=CONFIG['show_count']
-		CONFIG['show_count']=False
-		STATE['indent']+=1
+		STATE['indent'] += 1
+		STATE['show_count'] = CONFIG['show_count']
+		CONFIG['show_count'] = False
 
 		# print
-		if line==LOCALE['everything']:
+		if line == LOCALE['everything']:
 			readLines(filename, match.pattern, 'xre')
 		else:
-			readLines(filename,line,'wipe')
+			readLines(filename, line, 'wipe')
 
 		# restore things
-		CONFIG['show_count']=STATE['show_count']
-		STATE['indent']-=1
+		STATE['indent'] -= 1
+		CONFIG['show_count'] = STATE['show_count']
 
 # write lines to the file
 def writeLine(filename,line):
