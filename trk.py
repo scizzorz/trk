@@ -72,6 +72,7 @@ LOCALE['everything'] = 'everything else'
 ALIAS=dict()
 ALIAS['add'] = ('add','a')
 ALIAS['edit'] = ('edit','ed','e')
+ALIAS['edit_body'] = ('editsearch','edits','esearch','ese','es')
 ALIAS['mark'] = ('finish','complete','done','hide','x')
 ALIAS['mark_body'] = ('xsearch','xse','xs')
 
@@ -81,7 +82,7 @@ ALIAS['list'] = ('all','list','ls')
 ALIAS['search'] = ('search','find','se','fi','s','f')
 ALIAS['regex'] = ('regex','re')
 ALIAS['xregex'] = ('xregex','xre')
-ALIAS['eval'] = ('eval','ev','es')
+ALIAS['eval'] = ('eval','ev')
 
 # RegExes used to highlight colors
 RE_PROJECT=re.compile(r'(^|\s)(\+[\w\+]+)')
@@ -522,6 +523,11 @@ def main(argv):
 		elif cmd in ALIAS['edit']:
 			for task in argv[1:]:
 				editLines(filename, task)
+			os.system(CONFIG['editcmd'])
+
+		elif cmd in ALIAS['edit_body']:
+			for task in argv[1:]:
+				editLines(filename, task, field='body')
 			os.system(CONFIG['editcmd'])
 
 		elif cmd in ALIAS['add']:

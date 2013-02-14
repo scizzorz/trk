@@ -4,74 +4,73 @@ A nice little command-line interface for organizing tasks and small notes.
 
 ## Usage
 
-Add a new task (alias for `./trk.py add "task"`):
+### Modification commands
+
+Add a new task (equivalent to `./trk.py add "task"`):
 
 	./trk.py "task"
 
 Add multiple new tasks:
 
-	./trk.py add "task1" "task2"
+	./trk.py add|a "task1" "task2"
 
-Complete a task by task ID:
+Edit a task (locate by task ID):
+
+	./trk.py edit|ed|e "taskid"
+
+Edit a task (locate by task content):
+
+	./trk.py editsearch|edits|esearch|ese|es "search"
+
+Complete/delete a task (locate by task ID):
 
 	./trk.py x|finish|complete|hide "taskid"
 
-Complete a task by task body:
+Complete/delete a task (locate by task body):
 
 	./trk.py xs|xse|xsearch "search"
 
-List tasks (alias for `./trk.py all`):
+### View / search commands
+
+List tasks (equivalent to `./trk.py all`):
 
 	./trk.py
 
 List all tasks:
 
-	./trk.py all
+	./trk.py all|list|ls
 
-List all projects:
+List grouped and sorted by projects:
 
 	./trk.py projects|proj|prj|+
 
-List all contexts:
+List grouped and sorted by contexts:
 
 	./trk.py contexts|cont|ctx|@
 
-List tasks assigned to a +project (alias for `./trk.py search "+project"`):
-
-	./trk.py +project
-
-List tasks assigned to a @context (alias for `./trk.py search "@context"`):
-
-	./trk.py @context
-
-List tasks given a priority (alias for `./trk.py search "(#)"`):
-
-	./trk.py #
-
 Search tasks:
 
-	./trk.py search|find|se|fi "search term"
+	./trk.py search|find|se|fi|s|f "search term"
 
-Search tasks with regex:
+Search tasks with a regular expression:
 
 	./trk.py regex|re "pattern"
 
-Search tasks with exclusive regex (ie every task that *doesn't* match the pattern):
+Search tasks with an exclusive regular expression (ie every task that *doesn't* match the pattern):
 
 	./trk.py xregex|xre "pattern"
 
-Search tasks with an `eval`:  
-*(`se(string)`, `re(string)`, and `xre(string)` are shorthand for their respective `trk` commands)*  
-*(eg `./trk.py eval "se('text')"` is the same as `./trk.py search text`)*
+List tasks assigned to a +project (equivalent to `./trk.py search "+project"`):
 
-	./trk.py eval|ev|es "eval"
+	./trk.py +project
 
-Edit a task:
+List tasks assigned to a @context (equivalent to `./trk.py search "@context"`):
 
-	./trk.py edit|ed "taskid"
+	./trk.py @context
 
-Edit the whole list:
-	./trk.py edit|ed
+List tasks given a priority (equivalent to `./trk.py search "(#)"`):
+
+	./trk.py #
 
 ## Settings
 
