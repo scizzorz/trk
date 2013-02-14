@@ -82,7 +82,6 @@ ALIAS['list'] = ('all','list','ls')
 ALIAS['search'] = ('search','find','se','fi','s','f')
 ALIAS['regex'] = ('regex','re')
 ALIAS['xregex'] = ('xregex','xre')
-ALIAS['eval'] = ('eval','ev')
 
 # RegExes used to highlight colors
 RE_PROJECT=re.compile(r'(^|\s)(\+[\w\+]+)')
@@ -245,14 +244,6 @@ def formatLine(line, preid=None, show_id=True):
 	else:
 		return "%s%s" % (STATE['indent']*CONFIG['indent'],line)
 
-# eval shortcuts
-def eval_s(line,match=''):
-	return match in line
-def eval_r(line,match=''):
-	return re.search(match,line)!=None
-def eval_x(line,match=''):
-	return re.search(match,line)==None
-
 # read the file and return a list of sorted lines
 def readFile(filename):
 	try:
@@ -272,17 +263,9 @@ def readLines(filename, match='',regex=None):
 
 	lines = readFile(filename)
 
-	if regex=='eval':
-		match=match.replace('se(','eval_s(line,')
-		match=match.replace('xre(','eval_x(line,')
-		match=match.replace('re(','eval_r(line,')
-
 	for line in lines:
 		if regex=='wipe' and match in line:
 			print formatLine(line.replace(match,''),lineid(line))
-			count+=1
-		elif regex=='eval' and eval(match):
-			print formatLine(line)
 			count+=1
 		elif regex=="re" and re.search(match,line)!=None:
 			print formatLine(line)
@@ -506,11 +489,7 @@ def main(argv):
 
 	if len(argv)>1: # more than one argument
 		cmd = argv[0]
-		if ('alias_'+cmd) in CONFIG:
-			formatted = CONFIG['alias_'+cmd] % tuple(argv[1:])
-			main(['eval',formatted])
-
-		elif cmd in ALIAS['mark']:
+		if cmd in ALIAS['mark']:
 			for task in argv[1:]:
 				markLines(filename, task)
 			os.system(CONFIG['markcmd'])
@@ -544,18 +523,10 @@ def main(argv):
 		elif cmd in ALIAS['xregex']:
 			readLines(filename, argv[1], 'xre')
 
-		elif cmd in ALIAS['eval']:
-			readLines(filename, argv[1], 'eval')
-
 	elif len(argv)==1: # only one argument, probably an alias
 		task=argv[0]
 
-		# user-defined aliases are evaluated first if the user decides they hate mine
-		# and want to override them with their own
-		if ('alias_'+task) in CONFIG:
-			main(['eval',CONFIG['alias_'+task]])
-
-		elif task[0]=='@' and ' ' not in task and len(task)>1:
+		if task[0]=='@' and ' ' not in task and len(task)>1:
 			readLines(filename, task)
 
 		elif task[0]=='+' and ' ' not in task and len(task)>1:

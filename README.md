@@ -115,9 +115,6 @@ the text editor used to edit tasks
 `show_count = True`  
 show the number of tasks at the end of each output or not
 
-`alias_XXX = YYY`  
-allows you to create custom aliases. Expands `./trk.py XXX` into `./trk.py eval YYY`. Can also use arguments, eg `alias_r = re('%s')` will cause `./trk.py r ^x` to expand to `./trk.py eval "re('^x')"`
-
 ## Basic system
 
 Basic task storage/layout:
