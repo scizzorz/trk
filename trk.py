@@ -265,31 +265,57 @@ def read_file(filename):
 		return lines
 
 # read tasks
-def read_lines(filename, match = '', regex = None):
+def read_lines(filename, match = ''):
 	count = 0
-
 	lines = read_file(filename)
 
 	for line in lines:
-		if regex == 'wipe' and match in line:
-			print format_line(line.replace(match, ''), lineid(line))
-			count += 1
-		elif regex == "re" and re.search(match, line) != None:
-			print format_line(line)
-			count += 1
-		elif regex == "xre" and re.search(match, line) == None:
-			print format_line(line)
-			count += 1
-		elif regex == None and match in line:
+		if match in line:
 			print format_line(line)
 			count += 1
 
+	print_count(count)
 
+def read_lines_first_match(filename, regex, match):
+	count = 0
+	lines = read_file(filename)
+
+	for line in lines:
+		found = regex.search(line)
+		if found != None:
+			label = found.group(2)
+			if label == match:
+				print format_line(line.replace(match, ''), preid = lineid(line))
+				count += 1
+
+	print_count(count)
+
+
+def read_lines_re(filename, match, exclusive = False):
+	count = 0
+	lines = read_file(filename)
+
+	for line in lines:
+		found = False
+		if exclusive and re.search(match, line) == None:
+			found = True
+		elif not exclusive and re.search(match, line) != None:
+			found = True
+
+		if found:
+			print format_line(line)
+			count += 1
+
+	print_count(count)
+
+# print a nice count
+def print_count(count):
 	if CONFIG['show_count']:
 		loc = ('numlines', 'numlines_single')[count == 1]
 		count_text = LOCALE[loc] % count
 		indent = ' '*(CONFIG['id_size'] + 1)
 		print highlight(indent + count_text, CONFIG['hi_count'])
+
 
 def count_matches(filename, match):
 	lines = read_file(filename)
@@ -297,17 +323,16 @@ def count_matches(filename, match):
 	counts = dict()
 
 	for line in lines:
-		res = match.findall(line)
-		if len(res) == 0:
-			res = [('', LOCALE['everything'])]
+		found = match.search(line)
+		if found == None:
+			label = LOCALE['everything']
+		else:
+			label = found.group(2)
 
-		for i in res:
-			label = i[1]
+		if label not in counts:
+			counts[label] = 0
 
-			if label not in counts: # label hasn't been encountered yet
-				counts[label] = 0
-
-			counts[label] += 1
+		counts[label] += 1
 
 	sortable = list()
 	for label in counts:
@@ -317,11 +342,11 @@ def count_matches(filename, match):
 
 	sortable.sort(key = K)
 
-	for line in sortable:
+	for label in sortable:
 		# list fancy infos
-		loc = ('numlines', 'numlines_single')[counts[line] == 1]
-		count_text = highlight(LOCALE[loc] % counts[line], CONFIG['hi_count'])
-		print format_line(line + ' ' + count_text, show_id = False)
+		loc = ('numlines', 'numlines_single')[counts[label] == 1]
+		count_text = highlight(LOCALE[loc] % counts[label], CONFIG['hi_count'])
+		print format_line(label + ' ' + count_text, show_id = False)
 
 		# save the show_count setting and indent output
 		STATE['indent'] += 1
@@ -329,10 +354,10 @@ def count_matches(filename, match):
 		CONFIG['show_count'] = False
 
 		# print
-		if line == LOCALE['everything']:
-			read_lines(filename, match.pattern, 'xre')
+		if label == LOCALE['everything']:
+			read_lines_re(filename, match = match.pattern, exclusive = True)
 		else:
-			read_lines(filename, line, 'wipe')
+			read_lines_first_match(filename, match, label)
 
 		# restore things
 		STATE['indent'] -= 1
@@ -521,10 +546,10 @@ def main(args):
 			read_lines(filename, args[1])
 
 		elif cmd in ALIAS['regex']:
-			read_lines(filename, args[1], 're')
+			read_lines_re(filename, match = args[1])
 
 		elif cmd in ALIAS['xregex']:
-			read_lines(filename, args[1], 'xre')
+			read_lines_re(filename, match = args[1], exclusive = True)
 
 	elif len(args) == 1: # only one argument, probably an alias
 		task = args[0]
