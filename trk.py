@@ -446,7 +446,7 @@ def launch_file_editor(filename):
 def arg_settings(args):
 	configs = list()
 	for key in CONFIG:
-		configs.append(key+' = ')
+		configs.append(key+'=')
 
 	options, remainder = getopt.getopt(args, '', configs)
 
@@ -558,6 +558,6 @@ def main(args):
 		read_lines(filename)
 
 if __name__ == '__main__':
-	rc_settings()
 	argv = arg_settings(sys.argv[1:])
+	rc_settings()
 	main(argv)
