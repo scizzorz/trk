@@ -10,7 +10,7 @@ CONFIG = dict()
 # the configuration file
 # this can't really be changed in a config file,
 # but it can be changed by a flag
-CONFIG['config'] = "%s/%s" % (expanduser("~"), ".trkrc")
+CONFIG['config'] = '%s/%s' % (expanduser('~'), '.trkrc')
 
 # which file to use
 CONFIG['file'] = '.todo'
@@ -57,7 +57,7 @@ STATE['indent'] = 0
 
 # formatting dictionary
 LOCALE = dict()
-LOCALE['ioerror'] = "Unable to open file '%s' for %s"
+LOCALE['ioerror'] = 'Unable to open file "%s" for %s'
 LOCALE['marked'] = 'Marked as done: %s'
 LOCALE['deleted'] = 'Deleted: %s'
 LOCALE['saved'] = 'Saved new item: %s'
@@ -100,21 +100,21 @@ def date_to_mktime(datestring):
 		month = match.group(2)
 		day = match.group(3)
 
-		year = match.group(5) or time.strftime("%Y", time.gmtime())
+		year = match.group(5) or time.strftime('%Y', time.gmtime())
 		if len(year) == 3:
-			year = time.strftime("%Y", time.gmtime())
+			year = time.strftime('%Y', time.gmtime())
 		elif len(year) == 2:
-			year = "20"+year
+			year = '20'+year
 
-		hour = match.group(7) or "12"
-		minute = match.group(9) or "00"
+		hour = match.group(7) or '12'
+		minute = match.group(9) or '00'
 
 		pam = match.group(10) or 'am'
 		pam = pam.upper()
 
 		time_tuple = (month, day, year, hour, minute, pam)
-		time_string = "%s %s %s %s %s %s" % time_tuple
-		timestamp = time.strptime(time_string, "%m %d %Y %I %M %p")
+		time_string = '%s %s %s %s %s %s' % time_tuple
+		timestamp = time.strptime(time_string, '%m %d %Y %I %M %p')
 		unix = time.mktime(timestamp)
 	else:
 		unix = None
@@ -186,14 +186,14 @@ def highlight(string, color):
 
 	# conky highlighting
 	if CONFIG['hi_style'] == 'conky':
-		return "${color%d}%s${color}" % (color%10, string)
+		return '${color%d}%s${color}' % (color%10, string)
 
 	# xterm highlighting
 	elif CONFIG['hi_style'] == 'xterm':
 		if color < 8:
-			return "\033[%dm%s\033[0m" % (color + 30, string)
+			return '\033[%dm%s\033[0m' % (color + 30, string)
 		else:
-			return "\033[%dm%s\033[0m" % (color + 82, string)
+			return '\033[%dm%s\033[0m' % (color + 82, string)
 
 	# none
 	else:
@@ -246,9 +246,10 @@ def format_line(line, preid = None, show_id = True):
 			preid = lineid(uncolored_line)
 
 		indent = STATE['indent'] * CONFIG['indent']
-		return "%s%s %s" % (indent, highlight(preid, CONFIG['hi_id']), line)
+		return '%s%s %s' % (indent, highlight(preid, CONFIG['hi_id']), line)
+
 	else:
-		return "%s%s" % (STATE['indent']*CONFIG['indent'], line)
+		return '%s%s' % (STATE['indent']*CONFIG['indent'], line)
 
 # read the file and return a list of sorted lines
 def read_file(filename):
@@ -352,7 +353,7 @@ def write_line(filename, line):
 
 # mark lines as complete
 # also used to edit lines
-def mark_lines(filename, match = '', search_type = "id"):
+def mark_lines(filename, match = '', search_type = 'id'):
 	lines = read_file(filename)
 
 	try:
@@ -378,7 +379,7 @@ def mark_lines(filename, match = '', search_type = "id"):
 				temp.write('%s\n' % line)
 		temp.close()
 
-def edit_lines(filename, match = '', search_type = "id"):
+def edit_lines(filename, match = '', search_type = 'id'):
 	lines = read_file(filename)
 
 	try:
@@ -420,7 +421,7 @@ def launch_line_editor(line):
 		file_stream.close()
 
 		# open the editor
-		os.system("%s \"%s\"" % (CONFIG['editor'], name))
+		os.system('%s "%s"' % (CONFIG['editor'], name))
 
 		# open the file and read the new text
 		file_stream = open(name)
@@ -436,7 +437,7 @@ def launch_line_editor(line):
 # allows the user to edit the entire file at once
 def launch_file_editor(filename):
 	# open the file in the editor
-	os.system("%s \"%s\"" % (CONFIG['editor'], filename))
+	os.system('%s "%s"' % (CONFIG['editor'], filename))
 
 	# sort the file by using mark_lines
 	# 'Z' can never be part of the line ID,
@@ -487,7 +488,7 @@ def set_option(key, val):
 
 def main(args):
 	task = 'none'
-	filename = "%s/%s" % (expanduser("~"), CONFIG['file'])
+	filename = '%s/%s' % (expanduser('~'), CONFIG['file'])
 
 	if len(args)>1: # more than one argument
 		cmd = args[0]
