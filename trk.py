@@ -84,8 +84,8 @@ ALIAS['regex'] = ('regex', 're')
 ALIAS['xregex'] = ('xregex', 'xre')
 
 # RegExes used to highlight colors
-RE_PROJECT = re.compile(r'(^|\s)(\+[\w\+]+)')
-RE_CONTEXT = re.compile(r'(^|\s)(\@[\w\@\+]+)')
+RE_PROJECT = re.compile(r'(^|\s)(\+([\w\+]+))')
+RE_CONTEXT = re.compile(r'(^|\s)(\@([\w\@\+]+))')
 RE_PRIORITY = re.compile(r'\s*(\((\d)\))\s*')
 RE_DUE = re.compile(r'(\[(\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*\])')
 RE_WHITESPACE = re.compile(r'\s+')
@@ -233,8 +233,8 @@ def format_line(line, preid = None, show_id = True):
 	line = RE_WHITESPACE.sub(' ', line)
 
 	# highlighting subs
-	line = RE_PROJECT.sub(r'\1'+highlight(r'\2', CONFIG['hi_project']), line)
-	line = RE_CONTEXT.sub(r'\1'+highlight(r'\2', CONFIG['hi_context']), line)
+	line = RE_PROJECT.sub(r'\1'+highlight(r'\3', CONFIG['hi_project']), line)
+	line = RE_CONTEXT.sub(r'\1'+highlight(r'\3', CONFIG['hi_context']), line)
 	line = RE_PRIORITY.sub('', line)
 	line = RE_DUE.sub(format_date, line)
 
