@@ -87,7 +87,7 @@ ALIAS['xregex'] = ('xregex', 'xre')
 RE_PROJECT = re.compile(r'(^|\s)(\+([\w\+]+))')
 RE_CONTEXT = re.compile(r'(^|\s)(\@([\w\@\+]+))')
 RE_PRIORITY = re.compile(r'\s*(\((\d)\))\s*')
-RE_DUE = re.compile(r'(\[(\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*\])')
+RE_DUE = re.compile(r'(\[*(\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*\]*)')
 RE_WHITESPACE = re.compile(r'\s+')
 
 RE_SETTING = re.compile(r'(\w+)\s*\=\s*(.*)')
