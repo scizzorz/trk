@@ -438,7 +438,7 @@ def launch_line_editor(line):
 	# this code is kinda borrowed from Mercurial...
 	text = ''
 
-	(file_desc, name) = tempfile.mkstemp(prefix = 'trk-editor-', suffix = '.txt', text = True)
+	(file_desc, name) = tempfile.mkstemp(prefix = 'trk-editor-', suffix = '.todo', text = True)
 	try:
 		# open the temp file and fill it up with the existing text
 		file_stream = os.fdopen(file_desc, 'w')
