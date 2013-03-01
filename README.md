@@ -103,8 +103,14 @@ the palette color for highlighting task identifiers
 `hi_due = 14`  
 ...task due dates
 
+`hi_due_soon = 10`  
+...tasks due dates that are due "soon" (see the `soon` setting)
+
 `hi_overdue = 9`  
 ...tasks due dates that are overdue
+
+`soon = 86400`  
+the number of the seconds before a task is due to start marking it as "soon". Tasks that are due within the next `soon` seconds will have their due dates highlighted with the `hi_due_soon` color
 
 `priority_char = !`  
 the character used to represent priority

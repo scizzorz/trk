@@ -27,6 +27,7 @@ CONFIG['hi_project'] = 11
 CONFIG['hi_context'] = 10
 CONFIG['hi_priority'] = 9
 CONFIG['hi_due'] = 14
+CONFIG['hi_due_soon'] = 10
 CONFIG['hi_overdue'] = 9
 CONFIG['hi_count'] = 7
 
@@ -38,6 +39,9 @@ CONFIG['editor'] = 'vim'
 
 # show tasks count at the end or not?
 CONFIG['show_count'] = True
+
+# how soon should we start highlighting due dates?
+CONFIG['soon'] = 86400 # one day
 
 # what character to use for indents
 # how the heck do you change this in
@@ -211,8 +215,10 @@ def format_date(obj):
 		if obj.group(10)!= None: # am/pm
 			ret += obj.group(10)
 
-	if date_to_mktime('['+ret+']') < time.time():
+	if date_to_mktime(ret) < time.time():
 		return highlight(ret, CONFIG['hi_overdue'])
+	elif date_to_mktime(ret) < time.time()+CONFIG['soon']:
+		return highlight(ret, CONFIG['hi_due_soon'])
 	else:
 		return highlight(ret, CONFIG['hi_due'])
 
