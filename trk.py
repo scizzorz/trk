@@ -110,10 +110,10 @@ def date_to_mktime(datestring):
 		elif len(year) == 2:
 			year = '20'+year
 
-		hour = match.group(7) or '12'
-		minute = match.group(9) or '00'
+		hour = match.group(7) or '11'
+		minute = match.group(9) or '59'
 
-		pam = match.group(10) or 'am'
+		pam = match.group(10) or 'pm'
 		pam = pam.upper()
 
 		time_tuple = (month, day, year, hour, minute, pam)
