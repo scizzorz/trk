@@ -567,7 +567,10 @@ def main(args):
 			read_lines(filename, task)
 
 		elif task[0] in ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9'):
-			read_lines(filename, '(%s)' % task)
+			if task[0] == '0':
+				read_lines_re(filename, match = '\(\d\)', exclusive = True)
+			else:
+				read_lines(filename, '(%s)' % task)
 
 		elif task in ALIAS['projects']:
 			count_matches(filename, RE_PROJECT)
