@@ -90,7 +90,7 @@ ALIAS['xregex'] = ('xregex', 'xre')
 # RegExes used to highlight colors
 RE_PROJECT = re.compile(r'(^|\s)(\+([\w\+]+))')
 RE_CONTEXT = re.compile(r'(^|\s)(\@([\w\@\+]+))')
-RE_PRIORITY = re.compile(r'\s*(\((\d)\))\s*')
+RE_PRIORITY = re.compile(r'(^|\s)(\((\d)\))')
 RE_DUE = re.compile(r'(\[*(\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*\]*)')
 RE_WHITESPACE = re.compile(r'\s+')
 
@@ -139,7 +139,7 @@ def line_compare(task_a, task_b):
 	elif priority_match_a != None and priority_match_b == None:
 		return -1
 	elif priority_match_a != None and priority_match_b != None:
-		ret = int(priority_match_b.group(2)) - int(priority_match_a.group(2))
+		ret = int(priority_match_b.group(3)) - int(priority_match_a.group(3))
 		if ret != 0:
 			return ret
 
@@ -230,7 +230,7 @@ def format_line(line, preid = None, show_id = True):
 	# priority
 	has_priority = RE_PRIORITY.search(line)
 	if has_priority != None:
-		priority_chars = CONFIG['priority_char'] * int(has_priority.group(2))
+		priority_chars = CONFIG['priority_char'] * int(has_priority.group(3))
 		priority = highlight(priority_chars, CONFIG['hi_priority'])+' '
 	else:
 		priority = ''
