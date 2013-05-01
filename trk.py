@@ -259,6 +259,9 @@ def format_line(line, preid = None, show_id = True):
 
 # read the file and return a list of sorted lines
 def read_file(filename):
+	if not os.path.isfile(filename):
+		return ['add a task with: ./trk.py "my very first task"']
+
 	try:
 		temp = open(filename, 'r+')
 	except IOError:
