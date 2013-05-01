@@ -488,12 +488,11 @@ def arg_settings(args):
 	return remainder
 
 def rc_settings():
-	# get filename and open it
 	try:
 		lines = open(CONFIG['config'], 'r')
 	except IOError:
-		print LOCALE['ioerror'] % (CONFIG['config'], 'reading')
-		sys.exit(1)
+		# there wasn't anything there, no need to worry.
+		pass
 	else:
 		# loop through it
 		for line in lines:
