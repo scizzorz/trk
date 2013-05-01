@@ -138,6 +138,11 @@ Basic task storage/layout:
 * ideally it should only be one priority / date / time per task, but we'll see if I do anything to enforce that
 * no limit to number of projects / contexts a task can have
 
+## To Do (irony)
+* Some sort of syncing system
+* Perhaps an Android client as well
+* Some sort of Unix-style piping
+
 ### Examples
 
 	(2) [10/22] +cs220+lab2 submit @desktop
