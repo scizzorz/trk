@@ -480,12 +480,11 @@ def arg_settings(args):
 	for key in CONFIG:
 		configs.append(key+'=')
 
-	options, remainder = getopt.getopt(args, '', configs)
+	return getopt.getopt(args, '', configs)
 
+def apply_arg_settings(options):
 	for opt, arg in options:
 		set_option(opt[2:], arg)
-
-	return remainder
 
 def rc_settings():
 	try:
@@ -513,7 +512,6 @@ def set_option(key, val):
 		CONFIG[key] = False
 	else:
 		CONFIG[key] = val
-
 
 
 def main(args):
@@ -592,6 +590,16 @@ def main(args):
 		read_lines(filename)
 
 if __name__ == '__main__':
-	argv = arg_settings(sys.argv[1:])
+	# load and apply the command line settings
+	# apply before so that the config file is updated
+	options, argv = arg_settings(sys.argv[1:])
+	apply_arg_settings(options)
+
+	# load and apply the config file settings
 	rc_settings()
+
+	# apply the command line settings again
+	# apply after so the command line settings override config file
+	apply_arg_settings(options)
+
 	main(argv)
