@@ -330,6 +330,9 @@ def print_tags(filename, search):
 
 	for line in lines:
 		line_tags = search.findall(line)
+		if not line_tags:
+			line_tags.append(('', 'uncategorized', 'uncategorized'))
+
 		for _, tag, _ in line_tags:
 			subtags = tag.split("/")
 			root = tags
