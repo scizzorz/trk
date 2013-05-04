@@ -5,71 +5,84 @@ from os.path import expanduser
 # configuration
 # hopefully all of these will be ported to a .trkrc
 # and have command-line flags as well
-CONFIG = dict()
+CONFIG = {
+	# where to find the config file
+	'config': '%s/%s' % (expanduser('~'), '.trkrc'),
 
-# the configuration file
-# this can't really be changed in a config file,
-# but it can be changed by a flag
-CONFIG['config'] = '%s/%s' % (expanduser('~'), '.trkrc')
+	# what character to use for indents
+	# how the heck do you change this in
+	# a config file...
+	'indent': '   ',
 
-# what character to use for indents
-# how the heck do you change this in
-# a config file...
-CONFIG['indent'] = '   '
+	# to do filename
+	'file': '.todo',
 
-CONFIG['file'] = '.todo' # to do filename
-CONFIG['id_size'] = 4 # size of md5sum substring used as task id
-CONFIG['priority_char'] = '!' # which character to use for priority
-CONFIG['editor'] = 'vim' # used for editing tasks
-CONFIG['show_count'] = True # show total task count at the end
-CONFIG['soon'] = 86400 # how soon to start highlighting upcoming due dates
-CONFIG['hi_style'] = 'xterm' # highlighting
+	# size of md5sum substring used as task id
+	'id_size': 4,
 
-# color ID used to highlight each part of a task
-CONFIG['hi_id'] = 7
-CONFIG['hi_hash'] = 12
-CONFIG['hi_plus'] = 11
-CONFIG['hi_at'] = 10
-CONFIG['hi_priority'] = 9
-CONFIG['hi_due'] = 14
-CONFIG['hi_due_soon'] = 10
-CONFIG['hi_overdue'] = 9
-CONFIG['hi_count'] = 7
+	# which character to use for priority
+	'priority_char': '!',
 
-# called after a successful addition / edit / deletion
-CONFIG['writecmd'] = ''
-CONFIG['editcmd'] = ''
-CONFIG['markcmd'] = ''
+	# used for editing tasks
+	'editor': 'vim',
+
+	# show total task count at the end
+	'show_count': True,
+
+	# how soon to start highlighting upcoming due dates
+	'soon': 86400,
+
+	# highlighting
+	'hi_style': 'xterm',
+
+	# color ID used to highlight each part of a task
+	'hi_id': 7,
+	'hi_hash': 12,
+	'hi_plus': 11,
+	'hi_at': 10,
+	'hi_priority': 9,
+	'hi_due': 14,
+	'hi_due_soon': 10,
+	'hi_overdue': 9,
+	'hi_count': 7,
+
+	# called after a successful addition / edit / deletion
+	'writecmd': '',
+	'editcmd': '',
+	'markcmd': ''
+}
 
 
 # formatting dictionary
-LOCALE = dict()
-LOCALE['ioerror'] = 'Unable to open file "%s" for %s'
-LOCALE['marked'] = 'Marked as done: %s'
-LOCALE['deleted'] = 'Deleted: %s'
-LOCALE['saved'] = 'Saved new item: %s'
-LOCALE['added'] = 'Added new item: %s'
-LOCALE['numlines'] = '%s items'
-LOCALE['numlines_single'] = '%s item'
-LOCALE['label'] = '%s %s items'
-LOCALE['label_single'] = '%s %s item'
-LOCALE['everything'] = 'everything else'
+LOCALE = {
+	'ioerror': 'Unable to open file "%s" for %s',
+	'marked': 'Marked as done: %s',
+	'deleted': 'Deleted: %s',
+	'saved': 'Saved new item: %s',
+	'added': 'Added new item: %s',
+	'numlines': '%s items',
+	'numlines_single': '%s item',
+	'label': '%s %s items',
+	'label_single': '%s %s item',
+	'everything': 'everything else'
+}
 
 # command alias dictionary
-ALIAS = dict()
-ALIAS['add'] = ('add', 'a')
-ALIAS['edit'] = ('edit', 'ed', 'e')
-ALIAS['edit_body'] = ('editsearch', 'edits', 'esearch', 'ese', 'es')
-ALIAS['mark'] = ('finish', 'complete', 'done', 'hide', 'x')
-ALIAS['mark_body'] = ('xsearch', 'xse', 'xs')
+ALIAS = {
+	'add': ('add', 'a'),
+	'edit': ('edit', 'ed', 'e'),
+	'edit_body': ('editsearch', 'edits', 'esearch', 'ese', 'es'),
+	'mark': ('finish', 'complete', 'done', 'hide', 'x'),
+	'mark_body': ('xsearch', 'xse', 'xs'),
 
-ALIAS['hash'] = ('hash', '#')
-ALIAS['plus'] = ('plus', '+')
-ALIAS['at'] = ('at', '@')
-ALIAS['list'] = ('all', 'list', 'ls')
-ALIAS['search'] = ('search', 'find', 'se', 'fi', 's', 'f')
-ALIAS['regex'] = ('regex', 're')
-ALIAS['xregex'] = ('xregex', 'xre')
+	'hash': ('hash', '#'),
+	'plus': ('plus', '+'),
+	'at': ('at', '@'),
+	'list': ('all', 'list', 'ls'),
+	'search': ('search', 'find', 'se', 'fi', 's', 'f'),
+	'regex': ('regex', 're'),
+	'xregex': ('xregex', 'xre')
+}
 
 # regexes used to highlight colors
 RE_HASH = re.compile(r'(^|\s)(\#([\w\/]+))')
@@ -141,10 +154,16 @@ def line_compare(task_a, task_b):
 	elif time_a != None and time_b != None:
 		ret = time_b - time_a
 		if ret != 0:
-			return -ret/abs(ret)
+			return -ret
 
 
 	# string order
+	task_a = RE_PRIORITY.sub('', task_a)
+	task_a = RE_DUE.sub('', task_a)
+	task_a = RE_WHITESPACE.sub('', task_a)
+	task_b = RE_PRIORITY.sub('', task_b)
+	task_b = RE_DUE.sub('', task_b)
+	task_b = RE_WHITESPACE.sub('', task_b)
 	return cmp(task_a, task_b)
 
 # sorting key class
