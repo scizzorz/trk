@@ -329,53 +329,6 @@ def print_count(count):
 		indent = ' '*(CONFIG['id_size'] + 1)
 		print highlight(indent + count_text, CONFIG['hi_count'])
 
-
-def count_matches(filename, match):
-	lines = read_file(filename)
-
-	counts = dict()
-
-	for line in lines:
-		found = match.search(line)
-		if found == None:
-			label = LOCALE['everything']
-		else:
-			label = found.group(2)
-
-		if label not in counts:
-			counts[label] = 0
-
-		counts[label] += 1
-
-	sortable = list()
-	for label in counts:
-		if counts[label] != 0:
-			temp = label
-			sortable.append(temp)
-
-	sortable.sort(key = K)
-
-	for label in sortable:
-		# list fancy infos
-		loc = ('numlines', 'numlines_single')[counts[label] == 1]
-		count_text = highlight(LOCALE[loc] % counts[label], CONFIG['hi_count'])
-		print format_line(label + ' ' + count_text, show_id = False)
-
-		# save the show_count setting and indent output
-		STATE['indent'] += 1
-		STATE['show_count'] = CONFIG['show_count']
-		CONFIG['show_count'] = False
-
-		# print
-		if label == LOCALE['everything']:
-			read_lines_re(filename, match = match.pattern, exclusive = True)
-		else:
-			read_lines_first_match(filename, match, label)
-
-		# restore things
-		STATE['indent'] -= 1
-		CONFIG['show_count'] = STATE['show_count']
-
 def print_tags(filename, search):
 	lines = read_file(filename)
 
