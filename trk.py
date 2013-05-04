@@ -55,11 +55,6 @@ CONFIG['editcmd'] = ''
 CONFIG['markcmd'] = ''
 
 
-# state tracking
-STATE = dict()
-STATE['indent'] = 0
-
-
 # formatting dictionary
 LOCALE = dict()
 LOCALE['ioerror'] = 'Unable to open file "%s" for %s'
@@ -226,7 +221,7 @@ def format_date(obj):
 		return highlight(ret, CONFIG['hi_due'])
 
 # format a line for printing
-def format_line(line, preid = None, show_id = True):
+def format_line(line, indent=0, preid = None, show_id = True):
 	line = line.strip()
 	uncolored_line = line
 
@@ -255,11 +250,10 @@ def format_line(line, preid = None, show_id = True):
 		if preid == None:
 			preid = lineid(uncolored_line)
 
-		indent = STATE['indent'] * CONFIG['indent']
-		return '%s%s %s' % (indent, highlight(preid, CONFIG['hi_id']), line)
+		return '%s%s %s' % (indent * CONFIG['indent'], highlight(preid, CONFIG['hi_id']), line)
 
 	else:
-		return '%s%s' % (STATE['indent']*CONFIG['indent'], line)
+		return '%s%s' % (indent * CONFIG['indent'], line)
 
 # read the file and return a list of sorted lines
 def read_file(filename):
