@@ -90,9 +90,9 @@ ALIAS['regex'] = ('regex', 're')
 ALIAS['xregex'] = ('xregex', 'xre')
 
 # RegExes used to highlight colors
-RE_HASH = re.compile(r'(^|\s)(\#(\w+))')
-RE_PLUS = re.compile(r'(^|\s)(\+(\w+))')
-RE_AT = re.compile(r'(^|\s)(\@(\w+))')
+RE_HASH = re.compile(r'(^|\s)(\#([\w\/]+))')
+RE_PLUS = re.compile(r'(^|\s)(\+([\w\/]+))')
+RE_AT = re.compile(r'(^|\s)(\@([\w\/]+))')
 RE_PRIORITY = re.compile(r'(^|\s)(\((\d)\))')
 RE_DUE = re.compile(r'(\[*(\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*\]*)')
 RE_WHITESPACE = re.compile(r'\s+')
