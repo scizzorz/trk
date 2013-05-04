@@ -12,16 +12,20 @@ CONFIG = dict()
 # but it can be changed by a flag
 CONFIG['config'] = '%s/%s' % (expanduser('~'), '.trkrc')
 
-# which file to use
-CONFIG['file'] = '.todo'
+# what character to use for indents
+# how the heck do you change this in
+# a config file...
+CONFIG['indent'] = '   '
 
-# size of the md5 sum substring used as the task id
-CONFIG['id_size'] = 4
+CONFIG['file'] = '.todo' # to do filename
+CONFIG['id_size'] = 4 # size of md5sum substring used as task id
+CONFIG['priority_char'] = '!' # which character to use for priority
+CONFIG['editor'] = 'vim' # used for editing tasks
+CONFIG['show_count'] = True # show total task count at the end
+CONFIG['soon'] = 86400 # how soon to start highlighting upcoming due dates
+CONFIG['hi_style'] = 'xterm' # highlighting
 
-# highlighting on
-CONFIG['hi_style'] = 'xterm'
-
-# highlight colors (ANSI palette) used to highlight each part of a task
+# color ID used to highlight each part of a task
 CONFIG['hi_id'] = 7
 CONFIG['hi_hash'] = 12
 CONFIG['hi_plus'] = 11
@@ -32,24 +36,7 @@ CONFIG['hi_due_soon'] = 10
 CONFIG['hi_overdue'] = 9
 CONFIG['hi_count'] = 7
 
-# which character to use for priority
-CONFIG['priority_char'] = '!'
-
-# which editor to use to edit tasks
-CONFIG['editor'] = 'vim'
-
-# show tasks count at the end or not?
-CONFIG['show_count'] = True
-
-# how soon should we start highlighting due dates?
-CONFIG['soon'] = 86400 # one day
-
-# what character to use for indents
-# how the heck do you change this in
-# a config file...
-CONFIG['indent'] = '   '
-
-# debating use
+# called after a successful addition / edit / deletion
 CONFIG['writecmd'] = ''
 CONFIG['editcmd'] = ''
 CONFIG['markcmd'] = ''
@@ -84,7 +71,7 @@ ALIAS['search'] = ('search', 'find', 'se', 'fi', 's', 'f')
 ALIAS['regex'] = ('regex', 're')
 ALIAS['xregex'] = ('xregex', 'xre')
 
-# RegExes used to highlight colors
+# regexes used to highlight colors
 RE_HASH = re.compile(r'(^|\s)(\#([\w\/]+))')
 RE_PLUS = re.compile(r'(^|\s)(\+([\w\/]+))')
 RE_AT = re.compile(r'(^|\s)(\@([\w\/]+))')
