@@ -85,17 +85,19 @@ ALIAS = {
 }
 
 # regexes used to highlight colors
-RE_HASH = re.compile(r'(^|\s)(\#([\w\/]+))')
-RE_PLUS = re.compile(r'(^|\s)(\+([\w\/]+))')
-RE_AT = re.compile(r'(^|\s)(\@([\w\/]+))')
-RE_PRIORITY = re.compile(r'(^|\s)(\!(\d))')
-RE_DUE = re.compile(r'(\[*(\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*\]*)')
-RE_WHITESPACE = re.compile(r'\s+')
+RE = {
+	'hash': re.compile(r'(^|\s)(\#([\w\/]+))'),
+	'plus': re.compile(r'(^|\s)(\+([\w\/]+))'),
+	'at': re.compile(r'(^|\s)(\@([\w\/]+))'),
+	'priority': re.compile(r'(^|\s)(\!(\d))'),
+	'due': re.compile(r'(\[*(\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*\]*)'),
+	'whitespace': re.compile(r'\s+'),
 
-RE_SETTING = re.compile(r'(\w+)\s*\=\s*(.*)')
+	'setting': re.compile(r'(\w+)\s*\=\s*(.*)')
+}
 
 def date_to_mktime(datestring):
-	match = RE_DUE.search(datestring)
+	match = RE['due'].search(datestring)
 
 	# convert match into a sortable Unix time
 	if match != None:
@@ -130,8 +132,8 @@ def line_compare(task_a, task_b):
 	# if a = b, return 0
 
 	# priority
-	priority_match_a = RE_PRIORITY.search(task_a)
-	priority_match_b = RE_PRIORITY.search(task_b)
+	priority_match_a = RE['priority'].search(task_a)
+	priority_match_b = RE['priority'].search(task_b)
 	if priority_match_a == None and priority_match_b != None:
 		return 1
 	elif priority_match_a != None and priority_match_b == None:
@@ -158,12 +160,12 @@ def line_compare(task_a, task_b):
 
 
 	# string order
-	task_a = RE_PRIORITY.sub('', task_a)
-	task_a = RE_DUE.sub('', task_a)
-	task_a = RE_WHITESPACE.sub('', task_a)
-	task_b = RE_PRIORITY.sub('', task_b)
-	task_b = RE_DUE.sub('', task_b)
-	task_b = RE_WHITESPACE.sub('', task_b)
+	task_a = RE['priority'].sub('', task_a)
+	task_a = RE['due'].sub('', task_a)
+	task_a = RE['whitespace'].sub('', task_a)
+	task_b = RE['priority'].sub('', task_b)
+	task_b = RE['due'].sub('', task_b)
+	task_b = RE['whitespace'].sub('', task_b)
 	return cmp(task_a, task_b)
 
 # sorting key class
@@ -232,7 +234,7 @@ def format_line(line, indent=0, preid = None, show_id = True):
 	uncolored_line = line
 
 	# priority
-	has_priority = RE_PRIORITY.search(line)
+	has_priority = RE['priority'].search(line)
 	if has_priority != None:
 		priority_chars = CONFIG['priority_char'] * int(has_priority.group(3))
 		priority = highlight(priority_chars, CONFIG['hi_priority'])+' '
@@ -240,14 +242,14 @@ def format_line(line, indent=0, preid = None, show_id = True):
 		priority = ''
 
 	# strip duplicate whitespace (HTML DOES IT WHY CAN'T I)
-	line = RE_WHITESPACE.sub(' ', line)
+	line = RE['whitespace'].sub(' ', line)
 
 	# highlighting subs
-	line = RE_HASH.sub(r'\1'+highlight(r'\3', CONFIG['hi_hash']), line)
-	line = RE_PLUS.sub(r'\1'+highlight(r'\3', CONFIG['hi_plus']), line)
-	line = RE_AT.sub(r'\1'+highlight(r'\3', CONFIG['hi_at']), line)
-	line = RE_PRIORITY.sub('', line)
-	line = RE_DUE.sub(format_date, line)
+	line = RE['hash'].sub(r'\1'+highlight(r'\3', CONFIG['hi_hash']), line)
+	line = RE['plus'].sub(r'\1'+highlight(r'\3', CONFIG['hi_plus']), line)
+	line = RE['at'].sub(r'\1'+highlight(r'\3', CONFIG['hi_at']), line)
+	line = RE['priority'].sub('', line)
+	line = RE['due'].sub(format_date, line)
 
 	# print them with priority
 	line = priority+line.strip()
@@ -500,7 +502,7 @@ def rc_settings():
 		# loop through it
 		for line in lines:
 			# if it matches our settings regex
-			match = RE_SETTING.search(line)
+			match = RE['setting'].search(line)
 
 			# set the configuration option!
 			if match != None:
@@ -569,18 +571,18 @@ def main(args):
 
 		elif task[0] in ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9'):
 			if task[0] == '0':
-				read_lines_re(filename, match = '\(\d\)', exclusive = True)
+				read_lines_re(filename, match = '!\d', exclusive = True)
 			else:
-				read_lines(filename, '(%s)' % task)
+				read_lines(filename, '!%s' % task)
 
 		elif task in ALIAS['hash']:
-			print_tags(filename, RE_HASH)
+			print_tags(filename, RE['hash'])
 
 		elif task in ALIAS['plus']:
-			print_tags(filename, RE_PLUS)
+			print_tags(filename, RE['plus'])
 
 		elif task in ALIAS['at']:
-			print_tags(filename, RE_AT)
+			print_tags(filename, RE['at'])
 
 		elif task in ALIAS['edit']:
 			launch_file_editor(filename)
