@@ -23,8 +23,9 @@ CONFIG['hi_style'] = 'xterm'
 
 # highlight colors (ANSI palette) used to highlight each part of a task
 CONFIG['hi_id'] = 7
-CONFIG['hi_project'] = 11
-CONFIG['hi_context'] = 10
+CONFIG['hi_hash'] = 12
+CONFIG['hi_plus'] = 11
+CONFIG['hi_at'] = 10
 CONFIG['hi_priority'] = 9
 CONFIG['hi_due'] = 14
 CONFIG['hi_due_soon'] = 10
@@ -80,16 +81,18 @@ ALIAS['edit_body'] = ('editsearch', 'edits', 'esearch', 'ese', 'es')
 ALIAS['mark'] = ('finish', 'complete', 'done', 'hide', 'x')
 ALIAS['mark_body'] = ('xsearch', 'xse', 'xs')
 
-ALIAS['projects'] = ('projects', 'proj', 'prj', '+')
-ALIAS['contexts'] = ('contexts', 'cont', 'ctx', '@')
+ALIAS['hash'] = ('hash', '#')
+ALIAS['plus'] = ('plus', '+')
+ALIAS['at'] = ('at', '@')
 ALIAS['list'] = ('all', 'list', 'ls')
 ALIAS['search'] = ('search', 'find', 'se', 'fi', 's', 'f')
 ALIAS['regex'] = ('regex', 're')
 ALIAS['xregex'] = ('xregex', 'xre')
 
 # RegExes used to highlight colors
-RE_PROJECT = re.compile(r'(^|\s)(\+([\w\+]+))')
-RE_CONTEXT = re.compile(r'(^|\s)(\@([\w\@\+]+))')
+RE_HASH = re.compile(r'(^|\s)(\#(\w+))')
+RE_PLUS = re.compile(r'(^|\s)(\+(\w+))')
+RE_AT = re.compile(r'(^|\s)(\@(\w+))')
 RE_PRIORITY = re.compile(r'(^|\s)(\((\d)\))')
 RE_DUE = re.compile(r'(\[*(\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*\]*)')
 RE_WHITESPACE = re.compile(r'\s+')
@@ -239,8 +242,9 @@ def format_line(line, preid = None, show_id = True):
 	line = RE_WHITESPACE.sub(' ', line)
 
 	# highlighting subs
-	line = RE_PROJECT.sub(r'\1'+highlight(r'\3', CONFIG['hi_project']), line)
-	line = RE_CONTEXT.sub(r'\1'+highlight(r'\3', CONFIG['hi_context']), line)
+	line = RE_HASH.sub(r'\1'+highlight(r'\3', CONFIG['hi_hash']), line)
+	line = RE_PLUS.sub(r'\1'+highlight(r'\3', CONFIG['hi_plus']), line)
+	line = RE_AT.sub(r'\1'+highlight(r'\3', CONFIG['hi_at']), line)
 	line = RE_PRIORITY.sub('', line)
 	line = RE_DUE.sub(format_date, line)
 
@@ -572,11 +576,14 @@ def main(args):
 			else:
 				read_lines(filename, '(%s)' % task)
 
-		elif task in ALIAS['projects']:
-			count_matches(filename, RE_PROJECT)
+		elif task in ALIAS['hash']:
+			count_matches(filename, RE_HASH)
 
-		elif task in ALIAS['contexts']:
-			count_matches(filename, RE_CONTEXT)
+		elif task in ALIAS['plus']:
+			count_matches(filename, RE_PLUS)
+
+		elif task in ALIAS['at']:
+			count_matches(filename, RE_AT)
 
 		elif task in ALIAS['edit']:
 			launch_file_editor(filename)

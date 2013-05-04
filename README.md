@@ -40,13 +40,17 @@ List all tasks:
 
 	./trk.py all|list|ls
 
-List grouped and sorted by projects:
+List grouped and sorted by +tags:
 
-	./trk.py projects|proj|prj|+
+	./trk.py plus|+
 
-List grouped and sorted by contexts:
+List grouped and sorted by @tags:
 
-	./trk.py contexts|cont|ctx|@
+	./trk.py at|@
+
+List grouped and sorted by #tags:
+
+	./trk.py hash|#
 
 Search tasks:
 
@@ -60,17 +64,21 @@ Search tasks with an exclusive regular expression (ie every task that *doesn't* 
 
 	./trk.py xregex|xre "pattern"
 
-List tasks assigned to a +project (equivalent to `./trk.py search "+project"`):
+List tasks with a +tag (equivalent to `./trk.py search "+tag"`):
 
-	./trk.py +project
+	./trk.py +tag
 
-List tasks assigned to a @context (equivalent to `./trk.py search "@context"`):
+List tasks with an @tag (equivalent to `./trk.py search "@tag"`):
 
-	./trk.py @context
+	./trk.py @tag
 
-List tasks given a priority (equivalent to `./trk.py search "(#)"`):
+List tasks with an #tag (equivalent to `./trk.py search "#tag"`):
 
-	./trk.py #
+	./trk.py #tag
+
+List tasks given a priority (equivalent to `./trk.py search "(1)"`):
+
+	./trk.py 1
 
 ## Settings
 
@@ -91,11 +99,14 @@ the type of highlighting format `trk` should use. `xterm` and `conky` will print
 `hi_id = 7`  
 the palette color for highlighting task identifiers
 
-`hi_project = 11`  
-...task projects
+`hi_plus = 11`  
+...task +tags
 
-`hi_context = 10`  
-...task contexts
+`hi_at = 10`  
+...task @tags
+
+`hi_hash = 10`  
+...task #tags
 
 `hi_priority = 9`  
 ...task priorities
@@ -123,7 +134,8 @@ show the number of tasks at the end of each output or not
 
 ## Basic system
 
-Basic task storage/layout:
+Basic task storage/layout **(this needs to be rewritten)**:
+
 
 * stored as a plaintext file
 * one task per line
