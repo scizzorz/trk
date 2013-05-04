@@ -330,24 +330,35 @@ def print_tags(filename, search):
 
 	for line in lines:
 		line_tags = search.findall(line)
-		for _, _, tag in line_tags:
+		for _, tag, _ in line_tags:
 			subtags = tag.split("/")
 			root = tags
+			btag = ""
 			for subtag in subtags:
-				if subtag not in root:
-					root[subtag] = {}
-				root = root[subtag]
+				if btag:
+					btag += "/"
+				btag += subtag
+				if btag not in root:
+					root[btag] = {}
+				root = root[btag]
 			if '__base' not in root:
 				root['__base'] = []
 			root['__base'].append(line)
 
 	print_tags_aux(tags)
 
-def print_tags_aux(root, depth=0, label='__base'):
-	print "%s%s" % (("    " * depth), label)
+def print_tags_aux(root, depth=-1, label="__root"):
+	if depth >= 0:
+		temp = label.split("/")
+		if len(temp) > 1:
+			display_label = label[0] + temp[-1]
+		else:
+			display_label = label
+		print format_line(display_label, indent = depth, show_id = False)
+
 	if '__base' in root:
 		for line in root['__base']:
-			print "%s%s" % (("    ") * (depth+1), line.strip())
+			print format_line(line.replace(label, ''), indent = depth+1, preid = lineid(line))
 
 	for tag in root:
 		if tag != '__base':
