@@ -376,6 +376,36 @@ def count_matches(filename, match):
 		STATE['indent'] -= 1
 		CONFIG['show_count'] = STATE['show_count']
 
+def print_tags(filename, search):
+	lines = read_file(filename)
+
+	tags = dict()
+
+	for line in lines:
+		line_tags = search.findall(line)
+		for _, _, tag in line_tags:
+			subtags = tag.split("/")
+			root = tags
+			for subtag in subtags:
+				if subtag not in root:
+					root[subtag] = {}
+				root = root[subtag]
+			if '__base' not in root:
+				root['__base'] = []
+			root['__base'].append(line)
+
+	print_tags_aux(tags)
+
+def print_tags_aux(root, depth=0, label='__base'):
+	print "%s%s" % (("    " * depth), label)
+	if '__base' in root:
+		for line in root['__base']:
+			print "%s%s" % (("    ") * (depth+1), line.strip())
+
+	for tag in root:
+		if tag != '__base':
+			print_tags_aux(root[tag], depth+1, tag)
+
 # write lines to the file
 def write_line(filename, line):
 	try:
@@ -577,13 +607,13 @@ def main(args):
 				read_lines(filename, '(%s)' % task)
 
 		elif task in ALIAS['hash']:
-			count_matches(filename, RE_HASH)
+			print_tags(filename, RE_HASH)
 
 		elif task in ALIAS['plus']:
-			count_matches(filename, RE_PLUS)
+			print_tags(filename, RE_PLUS)
 
 		elif task in ALIAS['at']:
-			count_matches(filename, RE_AT)
+			print_tags(filename, RE_AT)
 
 		elif task in ALIAS['edit']:
 			launch_file_editor(filename)
