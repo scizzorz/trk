@@ -47,16 +47,15 @@ CONFIG = {
 	'hi_count': 7,
 
 	# called after a successful addition / edit / deletion
-	'writecmd': '',
-	'editcmd': '',
-	'markcmd': ''
+	'add_cmd': '',
+	'edit_cmd': '',
+	'del_cmd': ''
 }
 
 
 # formatting dictionary
 LOCALE = {
 	'ioerror': 'Unable to open file "%s" for %s',
-	'marked': 'Marked as done: %s',
 	'deleted': 'Deleted: %s',
 	'saved': 'Saved new item: %s',
 	'added': 'Added new item: %s',
@@ -72,8 +71,8 @@ ALIAS = {
 	'add': ('add', 'a'),
 	'edit': ('edit', 'ed', 'e'),
 	'edit_body': ('editsearch', 'edits', 'esearch', 'ese', 'es'),
-	'mark': ('finish', 'complete', 'done', 'hide', 'x'),
-	'mark_body': ('xsearch', 'xse', 'xs'),
+	'delete': ('finish', 'complete', 'done', 'hide', 'x'),
+	'delete_body': ('xsearch', 'xse', 'xs'),
 
 	'hash': ('hash', '#'),
 	'plus': ('plus', '+'),
@@ -161,26 +160,12 @@ def string_compare(task_a, task_b):
 	task_b = RE['whitespace'].sub('', task_b)
 	return cmp(task_a, task_b)
 
-def plus_compare(task_a, task_b):
-	task_a = RE['plus'].findall(task_a)
-	task_b = RE['plus'].findall(task_b)
-
-	task_a = ' '.join(i[1] for i in task_a)
-	task_b = ' '.join(i[1] for i in task_b)
-
-	if task_a and not task_b:
-		return -1
-	elif task_b and not task_a:
-		return 1
-
-	return cmp(task_a, task_b)
-
 def line_compare(task_a, task_b):
 	# these look backwards to me but they work...
 	# if a > b, return -
 	# if a < b, return +
 	# if a = b, return 0
-	return plus_compare(task_a, task_b) or priority_compare(task_a, task_b) or time_compare(task_a, task_b) or string_compare(task_a, task_b)
+	return priority_compare(task_a, task_b) or time_compare(task_a, task_b) or string_compare(task_a, task_b)
 
 # sorting key class
 class K(object):
@@ -389,8 +374,8 @@ def print_tags_aux(root, depth=-1, label="__root"):
 		if tag != '__base':
 			print_tags_aux(root[tag], depth+1, tag)
 
-# write lines to the file
-def write_line(filename, line):
+# add a line
+def add_line(filename, line):
 	try:
 		temp = open(filename, 'a+')
 	except IOError:
@@ -401,9 +386,8 @@ def write_line(filename, line):
 		temp.write('%s\n' % line)
 		temp.close()
 
-# mark lines as complete
-# also used to edit lines
-def mark_lines(filename, match = '', search_type = 'id'):
+# delete lines
+def delete_lines(filename, match = '', search_type = 'id'):
 	lines = read_file(filename)
 
 	try:
@@ -489,10 +473,10 @@ def launch_file_editor(filename):
 	# open the file in the editor
 	os.system('%s "%s"' % (CONFIG['editor'], filename))
 
-	# sort the file by using mark_lines
+	# sort the file by using delete_lines
 	# 'Z' can never be part of the line ID,
 	# so it will never match
-	mark_lines(filename, 'Z')
+	delete_lines(filename, 'Z')
 
 def arg_settings(args):
 	configs = list()
@@ -539,30 +523,30 @@ def main(args):
 
 	if len(args)>1: # more than one argument
 		cmd = args[0]
-		if cmd in ALIAS['mark']:
+		if cmd in ALIAS['delete']:
 			for task in args[1:]:
-				mark_lines(filename, task)
-			os.system(CONFIG['markcmd'])
+				delete_lines(filename, task)
+			os.system(CONFIG['del_cmd'])
 
-		elif cmd in ALIAS['mark_body']:
+		elif cmd in ALIAS['delete_body']:
 			for task in args[1:]:
-				mark_lines(filename, task, search_type = 'body')
-			os.system(CONFIG['markcmd'])
+				delete_lines(filename, task, search_type = 'body')
+			os.system(CONFIG['del_cmd'])
 
 		elif cmd in ALIAS['edit']:
 			for task in args[1:]:
 				edit_lines(filename, task)
-			os.system(CONFIG['editcmd'])
+			os.system(CONFIG['edit_cmd'])
 
 		elif cmd in ALIAS['edit_body']:
 			for task in args[1:]:
 				edit_lines(filename, task, search_type = 'body')
-			os.system(CONFIG['editcmd'])
+			os.system(CONFIG['edit_cmd'])
 
 		elif cmd in ALIAS['add']:
 			for task in args[1:]:
-				write_line(filename, task)
-			os.system(CONFIG['writecmd'])
+				add_line(filename, task)
+			os.system(CONFIG['add_cmd'])
 
 		elif cmd in ALIAS['search']:
 			read_lines(filename, args[1])
@@ -599,14 +583,14 @@ def main(args):
 
 		elif task in ALIAS['edit']:
 			launch_file_editor(filename)
-			os.system(CONFIG['editcmd'])
+			os.system(CONFIG['edit_cmd'])
 
 		elif task in ALIAS['list']:
 			read_lines(filename)
 
 		else: # no alias
-			write_line(filename, task)
-			os.system(CONFIG['writecmd'])
+			add_line(filename, task)
+			os.system(CONFIG['add_cmd'])
 
 	else: # no arguments
 		read_lines(filename)
