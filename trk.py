@@ -125,13 +125,7 @@ def date_to_mktime(datestring):
 
 	return unix
 
-def line_compare(task_a, task_b):
-	# these look backwards to me but they work...
-	# if a > b, return -
-	# if a < b, return +
-	# if a = b, return 0
-
-	# priority
+def priority_compare(task_a, task_b):
 	priority_match_a = RE['priority'].search(task_a)
 	priority_match_b = RE['priority'].search(task_b)
 	if priority_match_a == None and priority_match_b != None:
@@ -139,12 +133,9 @@ def line_compare(task_a, task_b):
 	elif priority_match_a != None and priority_match_b == None:
 		return -1
 	elif priority_match_a != None and priority_match_b != None:
-		ret = int(priority_match_b.group(3)) - int(priority_match_a.group(3))
-		if ret != 0:
-			return ret
+		return int(priority_match_b.group(3)) - int(priority_match_a.group(3))
 
-
-	# dates
+def time_compare(task_a, task_b):
 	time_a = date_to_mktime(task_a)
 	time_b = date_to_mktime(task_b)
 
@@ -154,12 +145,9 @@ def line_compare(task_a, task_b):
 	elif time_a != None and time_b == None:
 		return -1
 	elif time_a != None and time_b != None:
-		ret = time_b - time_a
-		if ret != 0:
-			return -ret
+		return time_a - time_b
 
-
-	# string order
+def string_compare(task_a, task_b):
 	task_a = RE['priority'].sub('', task_a)
 	task_a = RE['due'].sub('', task_a)
 	task_a = RE['whitespace'].sub('', task_a)
@@ -167,6 +155,13 @@ def line_compare(task_a, task_b):
 	task_b = RE['due'].sub('', task_b)
 	task_b = RE['whitespace'].sub('', task_b)
 	return cmp(task_a, task_b)
+
+def line_compare(task_a, task_b):
+	# these look backwards to me but they work...
+	# if a > b, return -
+	# if a < b, return +
+	# if a = b, return 0
+	return priority_compare(task_a, task_b) or time_compare(task_a, task_b) or string_compare(task_a, task_b)
 
 # sorting key class
 class K(object):
@@ -386,7 +381,6 @@ def write_line(filename, line):
 		print LOCALE['added'] % format_line(line)
 		temp.write('%s\n' % line)
 		temp.close()
-
 
 # mark lines as complete
 # also used to edit lines
