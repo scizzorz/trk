@@ -156,12 +156,26 @@ def string_compare(task_a, task_b):
 	task_b = RE['whitespace'].sub('', task_b)
 	return cmp(task_a, task_b)
 
+def plus_compare(task_a, task_b):
+	task_a = RE['plus'].findall(task_a)
+	task_b = RE['plus'].findall(task_b)
+
+	task_a = ' '.join(i[1] for i in task_a)
+	task_b = ' '.join(i[1] for i in task_b)
+
+	if task_a and not task_b:
+		return -1
+	elif task_b and not task_a:
+		return 1
+
+	return cmp(task_a, task_b)
+
 def line_compare(task_a, task_b):
 	# these look backwards to me but they work...
 	# if a > b, return -
 	# if a < b, return +
 	# if a = b, return 0
-	return priority_compare(task_a, task_b) or time_compare(task_a, task_b) or string_compare(task_a, task_b)
+	return plus_compare(task_a, task_b) or priority_compare(task_a, task_b) or time_compare(task_a, task_b) or string_compare(task_a, task_b)
 
 # sorting key class
 class K(object):
