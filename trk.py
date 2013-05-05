@@ -126,26 +126,31 @@ def date_to_mktime(datestring):
 	return unix
 
 def priority_compare(task_a, task_b):
-	priority_match_a = RE['priority'].search(task_a)
-	priority_match_b = RE['priority'].search(task_b)
-	if priority_match_a == None and priority_match_b != None:
+	priority_a = RE['priority'].search(task_a)
+	priority_b = RE['priority'].search(task_b)
+
+	if priority_a is None and priority_b is None:
+		return 0
+	elif priority_a is None and priority_b is not None:
 		return 1
-	elif priority_match_a != None and priority_match_b == None:
+	elif priority_a is not None and priority_b is None:
 		return -1
-	elif priority_match_a != None and priority_match_b != None:
-		return int(priority_match_b.group(3)) - int(priority_match_a.group(3))
+
+	return int(priority_b.group(3)) - int(priority_a.group(3))
 
 def time_compare(task_a, task_b):
 	time_a = date_to_mktime(task_a)
 	time_b = date_to_mktime(task_b)
 
-	# sort dateMatches
-	if time_a == None and time_b != None:
+	# sort matches
+	if time_a is None and time_b is None:
+		return 0
+	elif time_a is None and time_b is not None:
 		return 1
-	elif time_a != None and time_b == None:
+	elif time_a is not None and time_b is None:
 		return -1
-	elif time_a != None and time_b != None:
-		return time_a - time_b
+
+	return time_a - time_b
 
 def string_compare(task_a, task_b):
 	task_a = RE['priority'].sub('', task_a)
