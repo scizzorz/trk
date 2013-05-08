@@ -52,7 +52,6 @@ CONFIG = {
 	'del_cmd': ''
 }
 
-
 # formatting dictionary
 LOCALE = {
 	'ioerror': 'Unable to open file "%s" for %s',
@@ -298,7 +297,6 @@ def read_lines_re(filename, match, exclusive = False):
 	lines = read_file(filename)
 
 	for line in lines:
-		found = False
 		# (exclusive) == (no match found)
 		# when exclusive, print if no match found
 		# when inclusive, print if match found
@@ -560,13 +558,10 @@ def main(args):
 	elif len(args) == 1: # only one argument, probably an alias
 		task = args[0]
 
-		if task[0] == '@' and ' ' not in task and len(task)>1:
-			read_lines(filename, task)
+		if (task[0] in '+@#') and (' ' not in task) and len(task) > 1:
+			read_lines_re(filename, re.compile(r'(^|\s)(\%s([\w\/]*)%s)' % (task[0], task[1:])))
 
-		elif task[0] == '+' and ' ' not in task and len(task)>1:
-			read_lines(filename, task)
-
-		elif task[0] in ('0', '1', '2', '3', '4', '5', '6', '7', '8', '9'):
+		elif task.isdigit():
 			if task[0] == '0':
 				read_lines_re(filename, match = '!\d', exclusive = True)
 			else:
