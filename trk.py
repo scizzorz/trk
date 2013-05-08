@@ -209,28 +209,34 @@ def highlight(string, color):
 		return string
 
 def format_date(obj):
-	ret = '%s/%s' % (obj.group(2), obj.group(3))
-	if obj.group(5)!= None: # year
-		ret += '/'+obj.group(5)
+	ret = '%s/%s' % (obj.group(2), obj.group(3)) # month/day
 
-	if obj.group(7)!= None: # hour / time
+	if obj.group(5)!= None: # '/' + year
+		ret += '/' + obj.group(5)
+
+	if obj.group(7)!= None: # ' ' + hour
 		ret += ' '+obj.group(7)
-		if obj.group(8)!= None: # minutes
+
+		if obj.group(8)!= None: # :minutes
 			ret += obj.group(8)
-		if obj.group(10)!= None: # am/pm
+
+		if obj.group(10)!= None: # (am|pm)
 			ret += obj.group(10)
 
 	if date_to_mktime(ret) < time.time():
-		return highlight(ret, CONFIG['hi_overdue'])
+		hi = 'hi_overdue'
 	elif date_to_mktime(ret) < time.time()+CONFIG['soon']:
-		return highlight(ret, CONFIG['hi_due_soon'])
+		hi = 'hi_due_soon'
 	else:
-		return highlight(ret, CONFIG['hi_due'])
+		hi = 'hi_due'
+
+	return highlight(ret, CONFIG[hi])
 
 # format a line for printing
-def format_line(line, indent=0, preid = None, show_id = True):
+def format_line(line, indent=0, id = None, show_id = True):
 	line = line.strip()
-	uncolored_line = line
+	if id is None:
+		id = lineid(line)
 
 	# priority
 	has_priority = RE['priority'].search(line)
@@ -251,13 +257,10 @@ def format_line(line, indent=0, preid = None, show_id = True):
 	line = RE['due'].sub(format_date, line)
 
 	# print them with priority
-	line = priority+line.strip()
+	line = priority + line.strip()
 
 	if show_id:
-		if preid == None:
-			preid = lineid(uncolored_line)
-
-		return '%s%s %s' % (indent * CONFIG['indent'], highlight(preid, CONFIG['hi_id']), line)
+		return '%s%s %s' % (indent * CONFIG['indent'], highlight(id, CONFIG['hi_id']), line)
 
 	else:
 		return '%s%s' % (indent * CONFIG['indent'], line)
@@ -290,33 +293,16 @@ def read_lines(filename, match = ''):
 
 	print_count(count)
 
-def read_lines_first_match(filename, regex, match):
-	count = 0
-	lines = read_file(filename)
-
-	for line in lines:
-		found = regex.search(line)
-		if found != None:
-			label = found.group(2)
-			if label == match:
-				print format_line(line.replace(match, ''), preid = lineid(line))
-				count += 1
-
-	print_count(count)
-
-
 def read_lines_re(filename, match, exclusive = False):
 	count = 0
 	lines = read_file(filename)
 
 	for line in lines:
 		found = False
-		if exclusive and re.search(match, line) == None:
-			found = True
-		elif not exclusive and re.search(match, line) != None:
-			found = True
-
-		if found:
+		# (exclusive) == (no match found)
+		# when exclusive, print if no match found
+		# when inclusive, print if match found
+		if exclusive == (re.search(match, line) is None):
 			print format_line(line)
 			count += 1
 
@@ -368,7 +354,7 @@ def print_tags_aux(root, depth=-1, label="__root"):
 
 	if '__base' in root:
 		for line in root['__base']:
-			print format_line(line.replace(label, ''), indent = depth+1, preid = lineid(line))
+			print format_line(line.replace(label, ''), indent = depth+1, id = lineid(line))
 
 	for tag in root:
 		if tag != '__base':
