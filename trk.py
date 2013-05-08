@@ -10,14 +10,13 @@ CONFIG = {
 	'config': '%s/%s' % (expanduser('~'), '.trkrc'),
 
 	# what character to use for indents
-	# how the heck do you change this in
-	# a config file...
+	# how the heck do you change this in a config file...
 	'indent': '   ',
 
-	# to do filename
+	# todo filename
 	'file': '.todo',
 
-	# size of md5sum substring used as item id
+	# size of md5sum slice to use as item id
 	'id_size': 4,
 
 	# which character to use for priority
@@ -32,7 +31,7 @@ CONFIG = {
 	# how soon to start highlighting upcoming due dates
 	'soon': 86400,
 
-	# highlighting
+	# highlighting type
 	'hi_style': 'xterm',
 
 	# color ID used to highlight each part of a item
@@ -86,7 +85,7 @@ ALIAS = {
 RE = {
 	'hash': re.compile(r'(^|\s)(\#([\w\/]+))'),
 	'plus': re.compile(r'(^|\s)(\+([\w\/]+))'),
-	'at': re.compile(r'(^|\s)(\@([\w\/]+))'),
+	'at':   re.compile(r'(^|\s)(\@([\w\/]+))'),
 	'priority': re.compile(r'(^|\s)(\!(\d))'),
 	'due': re.compile(r'(\[*(\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*\]*)'),
 	'whitespace': re.compile(r'\s+'),
@@ -102,20 +101,24 @@ def date_to_mktime(datestring):
 		month = match.group(2)
 		day = match.group(3)
 
+		# year should default to this year
 		year = match.group(5) or time.strftime('%Y', time.gmtime())
-		if len(year) == 3:
+
+		if len(year) == 3: # three digit years should default to this year
 			year = time.strftime('%Y', time.gmtime())
-		elif len(year) == 2:
+		elif len(year) == 2: # two digit years should default to this century
 			year = '20'+year
 
+		# due time should default to 11:59pm
 		hour = match.group(7) or '11'
 		minute = match.group(9) or '59'
+		meridiem = (match.group(10) or 'pm').upper()
 
-		pam = match.group(10) or 'pm'
-		pam = pam.upper()
-
-		time_tuple = (month, day, year, hour, minute, pam)
+		# make a nice string with all the goodies we collected
+		time_tuple = (month, day, year, hour, minute, meridiem)
 		time_string = '%s %s %s %s %s %s' % time_tuple
+
+		# convert it to a tm_struct and then into a unix timestamp
 		timestamp = time.strptime(time_string, '%m %d %Y %I %M %p')
 		unix = time.mktime(timestamp)
 	else:
@@ -123,6 +126,7 @@ def date_to_mktime(datestring):
 
 	return unix
 
+# sort by priority
 def priority_compare(item_a, item_b):
 	priority_a = RE['priority'].search(item_a)
 	priority_b = RE['priority'].search(item_b)
@@ -136,11 +140,11 @@ def priority_compare(item_a, item_b):
 
 	return int(priority_b.group(3)) - int(priority_a.group(3))
 
+# sort by due time
 def time_compare(item_a, item_b):
 	time_a = date_to_mktime(item_a)
 	time_b = date_to_mktime(item_b)
 
-	# sort matches
 	if time_a is None and time_b is None:
 		return 0
 	elif time_a is None and time_b is not None:
@@ -150,6 +154,7 @@ def time_compare(item_a, item_b):
 
 	return time_a - time_b
 
+# sort by the item contents, stripped of priority, due dates, and doubled whitespace
 def string_compare(item_a, item_b):
 	item_a = RE['priority'].sub('', item_a)
 	item_a = RE['due'].sub('', item_a)
@@ -159,6 +164,7 @@ def string_compare(item_a, item_b):
 	item_b = RE['whitespace'].sub('', item_b)
 	return cmp(item_a, item_b)
 
+# sort by priority, time, and then contents
 def line_compare(item_a, item_b):
 	# these look backwards to me but they work...
 	# if a > b, return -
@@ -183,10 +189,11 @@ class K(object):
 	def __ne__(self, other):
 		return line_compare(self.obj, other.obj) != 0
 
-# computes the md5 item id of a line
+# computes the item id of a line
 def lineid(line):
 	line = line.strip()
-	return md5.new(line).hexdigest()[0:CONFIG['id_size']]
+	hex = md5.new(line).hexdigest()
+	return hex[0:CONFIG['id_size']]
 
 # highlights a string with the given color
 def highlight(string, color):
@@ -233,11 +240,14 @@ def format_date(obj):
 
 # format a line for printing
 def format_line(line, indent=0, id = None, show_id = True):
+	# strip leading/trailing whitespace
 	line = line.strip()
+
+	# if we weren't given an id, calculate it before any modifications
 	if id is None:
 		id = lineid(line)
 
-	# priority
+	# convert priority from !3 to !!!
 	has_priority = RE['priority'].search(line)
 	if has_priority != None:
 		priority_chars = CONFIG['priority_char'] * int(has_priority.group(3))
@@ -248,14 +258,14 @@ def format_line(line, indent=0, id = None, show_id = True):
 	# strip duplicate whitespace (HTML DOES IT WHY CAN'T I)
 	line = RE['whitespace'].sub(' ', line)
 
-	# highlighting subs
+	# highlighting replacements
 	line = RE['hash'].sub(r'\1'+highlight(r'\3', CONFIG['hi_hash']), line)
 	line = RE['plus'].sub(r'\1'+highlight(r'\3', CONFIG['hi_plus']), line)
 	line = RE['at'].sub(r'\1'+highlight(r'\3', CONFIG['hi_at']), line)
 	line = RE['priority'].sub('', line)
 	line = RE['due'].sub(format_date, line)
 
-	# print them with priority
+	# re-include the expanded priority
 	line = priority + line.strip()
 
 	if show_id:
@@ -266,6 +276,7 @@ def format_line(line, indent=0, id = None, show_id = True):
 
 # read the file and return a list of sorted lines
 def read_file(filename):
+	# no file? display a help message!
 	if not os.path.isfile(filename):
 		return ['add a item with: ./trk.py "my very first item"']
 
@@ -275,12 +286,13 @@ def read_file(filename):
 		print LOCALE['ioerror'] % (filename, 'reading')
 		return None
 	else:
+		# sort the lines and display them nicely
 		lines = [line for line in temp if line.strip()]
 		lines.sort(key = K)
 		temp.close()
 		return lines
 
-# read items
+# read items (and search if requested)
 def read_lines(filename, match = ''):
 	count = 0
 	lines = read_file(filename)
@@ -292,6 +304,7 @@ def read_lines(filename, match = ''):
 
 	print_count(count)
 
+# read items and search with regex
 def read_lines_re(filename, match, exclusive = False):
 	count = 0
 	lines = read_file(filename)
@@ -306,7 +319,7 @@ def read_lines_re(filename, match, exclusive = False):
 
 	print_count(count)
 
-# print a nice count
+# display a cool count line
 def print_count(count):
 	if CONFIG['show_count']:
 		loc = ('numlines', 'numlines_single')[count == 1]
@@ -314,16 +327,22 @@ def print_count(count):
 		indent = ' '*(CONFIG['id_size'] + 1)
 		print highlight(indent + count_text, CONFIG['hi_count'])
 
+# display a pretty tag list with indents and complex tag splitting
 def print_tags(filename, search):
 	lines = read_file(filename)
 
 	tags = dict()
 
 	for line in lines:
+
+		# find all of the delightful tags
 		line_tags = search.findall(line)
+
+		# mark it as uncategorized if there were no tags
 		if not line_tags:
 			line_tags.append(('', 'uncategorized', 'uncategorized'))
 
+		# loop through each tag and then its subtags
 		for _, tag, _ in line_tags:
 			subtags = tag.split("/")
 			root = tags
@@ -344,6 +363,7 @@ def print_tags(filename, search):
 
 			root['__base'].append(line)
 
+	# recursively print the dict
 	print_tags_aux(tags)
 
 def print_tags_aux(root, depth=-1, label="__root"):
@@ -359,12 +379,14 @@ def print_tags_aux(root, depth=-1, label="__root"):
 		else:
 			display_label = label
 
-		count = len(root['__base']) if ('__base' in root) else 0
+		# prepend the count if necessary
 		if CONFIG['show_count']:
+			count = len(root['__base']) if ('__base' in root) else 0
 			loc = ('numlines', 'numlines_single')[count == 1]
 			count_text = LOCALE[loc] % count
 			display_label += ' ' + highlight(count_text, CONFIG['hi_count'])
 
+		# print the label
 		print format_line(display_label, indent = depth, show_id = False)
 
 	# display base items of the tag first
@@ -372,13 +394,12 @@ def print_tags_aux(root, depth=-1, label="__root"):
 		for line in root['__base']:
 			print format_line(line.replace(label, ''), indent = depth+1, id = lineid(line))
 
-	# display the subtags next
+	# recurse into the subtags
 	tags = sorted(root.keys())
 	for tag in tags:
 		if tag != '__base': # already displayed the base
 			print_tags_aux(root[tag], depth+1, tag)
 
-# add a line
 def add_line(filename, line):
 	try:
 		temp = open(filename, 'a+')
@@ -390,7 +411,6 @@ def add_line(filename, line):
 		temp.write('%s\n' % line)
 		temp.close()
 
-# delete lines
 def delete_lines(filename, match = '', search_type = 'id'):
 	lines = read_file(filename)
 
@@ -482,6 +502,7 @@ def launch_file_editor(filename):
 	# so it will never match
 	delete_lines(filename, 'Z')
 
+# read the settings from command line
 def arg_settings(args):
 	configs = list()
 	for key in CONFIG:
@@ -489,10 +510,12 @@ def arg_settings(args):
 
 	return getopt.getopt(args, '', configs)
 
+# apply the settings from command line
 def apply_arg_settings(options):
 	for opt, arg in options:
 		set_option(opt[2:], arg)
 
+# read / apply the settings from config file
 def rc_settings():
 	try:
 		lines = open(CONFIG['config'], 'r')
@@ -510,14 +533,17 @@ def rc_settings():
 				set_option(match.group(1), match.group(2))
 		lines.close()
 
+# toggle a specific config option
 def set_option(key, val):
-	if val.isdigit():
+	if val.isdigit(): # int
 		CONFIG[key] = int(val)
 	elif val.lower() == 'true':
 		CONFIG[key] = True
 	elif val.lower() == 'false':
 		CONFIG[key] = False
-	else:
+	elif val.lower() == 'none':
+		CONFIG[key] = None
+	else: # str
 		CONFIG[key] = val
 
 
@@ -525,84 +551,106 @@ def main(args):
 	item = 'none'
 	filename = '%s/%s' % (expanduser('~'), CONFIG['file'])
 
-	if len(args)>1: # more than one argument
+	# more than one argument
+	if len(args)>1:
 		cmd = args[0]
+		# delete by id
 		if cmd in ALIAS['delete']:
 			for item in args[1:]:
 				delete_lines(filename, item)
 			os.system(CONFIG['del_cmd'])
 
+		# delete by body
 		elif cmd in ALIAS['delete_body']:
 			for item in args[1:]:
 				delete_lines(filename, item, search_type = 'body')
 			os.system(CONFIG['del_cmd'])
 
+		# edit by id
 		elif cmd in ALIAS['edit']:
 			for item in args[1:]:
 				edit_lines(filename, item)
 			os.system(CONFIG['edit_cmd'])
 
+		# edit by body
 		elif cmd in ALIAS['edit_body']:
 			for item in args[1:]:
 				edit_lines(filename, item, search_type = 'body')
 			os.system(CONFIG['edit_cmd'])
 
+		# add multiple
 		elif cmd in ALIAS['add']:
 			for item in args[1:]:
 				add_line(filename, item)
 			os.system(CONFIG['add_cmd'])
 
+		# search
 		elif cmd in ALIAS['search']:
 			read_lines(filename, args[1])
 
+		# regex search
 		elif cmd in ALIAS['regex']:
 			read_lines_re(filename, match = args[1])
 
+		# exclusive regex search
 		elif cmd in ALIAS['xregex']:
 			read_lines_re(filename, match = args[1], exclusive = True)
 
-	elif len(args) == 1: # only one argument, probably an alias
+	# only one argument, probably an alias
+	elif len(args) == 1:
 		item = args[0]
 
+		# tag searching
 		if (item[0] in '+@#') and (' ' not in item) and len(item) > 1:
 			read_lines_re(filename, re.compile(r'(^|\s)(\%s([\w\/]*)%s)' % (item[0], item[1:])))
 
+		# priority search
 		elif item.isdigit():
 			if item[0] == '0':
 				read_lines_re(filename, match = '!\d', exclusive = True)
 			else:
 				read_lines(filename, '!%s' % item)
 
+		# shorthand delete
 		elif item[0] == ':':
 			delete_lines(filename, item[1:], search_type = 'body')
 
+		# shorthand edit
 		elif item[0] == '?':
 			edit_lines(filename, item[1:], search_type = 'body')
 
+		# shorthand search
 		elif item[0] == '/':
 			read_lines(filename, item[1:])
 
+		# hash tag listing
 		elif item in ALIAS['hash']:
 			print_tags(filename, RE['hash'])
 
+		# plus tag listing
 		elif item in ALIAS['plus']:
 			print_tags(filename, RE['plus'])
 
+		# at tag listing
 		elif item in ALIAS['at']:
 			print_tags(filename, RE['at'])
 
+		# file edit
 		elif item in ALIAS['edit']:
 			launch_file_editor(filename)
 			os.system(CONFIG['edit_cmd'])
 
+		# list
 		elif item in ALIAS['list']:
 			read_lines(filename)
 
-		else: # no alias
+		# no command, just add
+		else:
 			add_line(filename, item)
 			os.system(CONFIG['add_cmd'])
 
-	else: # no arguments
+	# no arguments, just list
+	else:
 		read_lines(filename)
 
 if __name__ == '__main__':
