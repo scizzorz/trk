@@ -330,34 +330,48 @@ def print_tags(filename, search):
 			subtags = tag.split("/")
 			root = tags
 			btag = ""
+
 			for subtag in subtags:
 				if btag:
 					btag += "/"
 				btag += subtag
+
 				if btag not in root:
 					root[btag] = {}
+
 				root = root[btag]
+
 			if '__base' not in root:
 				root['__base'] = []
+
 			root['__base'].append(line)
 
 	print_tags_aux(tags)
 
 def print_tags_aux(root, depth=-1, label="__root"):
+	# display the label if we're not the absolute lowest level
 	if depth >= 0:
 		temp = label.split("/")
+
+		# complex tags: recombine the tag type with the last piece
 		if len(temp) > 1:
 			display_label = label[0] + temp[-1]
+
+		# simple tags: just display the tag
 		else:
 			display_label = label
+
 		print format_line(display_label, indent = depth, show_id = False)
 
+	# display base items of the tag first
 	if '__base' in root:
 		for line in root['__base']:
 			print format_line(line.replace(label, ''), indent = depth+1, id = lineid(line))
 
-	for tag in root:
-		if tag != '__base':
+	# display the subtags next
+	tags = sorted(root.keys())
+	for tag in tags:
+		if tag != '__base': # already displayed the base
 			print_tags_aux(root[tag], depth+1, tag)
 
 # add a line
