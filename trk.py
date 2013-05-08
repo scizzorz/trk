@@ -359,6 +359,12 @@ def print_tags_aux(root, depth=-1, label="__root"):
 		else:
 			display_label = label
 
+		count = len(root['__base']) if ('__base' in root) else 0
+		if CONFIG['show_count']:
+			loc = ('numlines', 'numlines_single')[count == 1]
+			count_text = LOCALE[loc] % count
+			display_label += ' ' + highlight(count_text, CONFIG['hi_count'])
+
 		print format_line(display_label, indent = depth, show_id = False)
 
 	# display base items of the tag first
