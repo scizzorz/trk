@@ -567,6 +567,15 @@ def main(args):
 			else:
 				read_lines(filename, '!%s' % item)
 
+		elif item[0] == ':':
+			delete_lines(filename, item[1:], search_type = 'body')
+
+		elif item[0] == '?':
+			edit_lines(filename, item[1:], search_type = 'body')
+
+		elif item[0] == '/':
+			read_lines(filename, item[1:])
+
 		elif item in ALIAS['hash']:
 			print_tags(filename, RE['hash'])
 
