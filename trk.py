@@ -17,16 +17,16 @@ CONFIG = {
 	# to do filename
 	'file': '.todo',
 
-	# size of md5sum substring used as task id
+	# size of md5sum substring used as item id
 	'id_size': 4,
 
 	# which character to use for priority
 	'priority_char': '!',
 
-	# used for editing tasks
+	# used for editing items
 	'editor': 'vim',
 
-	# show total task count at the end
+	# show total item count at the end
 	'show_count': True,
 
 	# how soon to start highlighting upcoming due dates
@@ -35,7 +35,7 @@ CONFIG = {
 	# highlighting
 	'hi_style': 'xterm',
 
-	# color ID used to highlight each part of a task
+	# color ID used to highlight each part of a item
 	'hi_id': 7,
 	'hi_hash': 12,
 	'hi_plus': 11,
@@ -123,9 +123,9 @@ def date_to_mktime(datestring):
 
 	return unix
 
-def priority_compare(task_a, task_b):
-	priority_a = RE['priority'].search(task_a)
-	priority_b = RE['priority'].search(task_b)
+def priority_compare(item_a, item_b):
+	priority_a = RE['priority'].search(item_a)
+	priority_b = RE['priority'].search(item_b)
 
 	if priority_a is None and priority_b is None:
 		return 0
@@ -136,9 +136,9 @@ def priority_compare(task_a, task_b):
 
 	return int(priority_b.group(3)) - int(priority_a.group(3))
 
-def time_compare(task_a, task_b):
-	time_a = date_to_mktime(task_a)
-	time_b = date_to_mktime(task_b)
+def time_compare(item_a, item_b):
+	time_a = date_to_mktime(item_a)
+	time_b = date_to_mktime(item_b)
 
 	# sort matches
 	if time_a is None and time_b is None:
@@ -150,21 +150,21 @@ def time_compare(task_a, task_b):
 
 	return time_a - time_b
 
-def string_compare(task_a, task_b):
-	task_a = RE['priority'].sub('', task_a)
-	task_a = RE['due'].sub('', task_a)
-	task_a = RE['whitespace'].sub('', task_a)
-	task_b = RE['priority'].sub('', task_b)
-	task_b = RE['due'].sub('', task_b)
-	task_b = RE['whitespace'].sub('', task_b)
-	return cmp(task_a, task_b)
+def string_compare(item_a, item_b):
+	item_a = RE['priority'].sub('', item_a)
+	item_a = RE['due'].sub('', item_a)
+	item_a = RE['whitespace'].sub('', item_a)
+	item_b = RE['priority'].sub('', item_b)
+	item_b = RE['due'].sub('', item_b)
+	item_b = RE['whitespace'].sub('', item_b)
+	return cmp(item_a, item_b)
 
-def line_compare(task_a, task_b):
+def line_compare(item_a, item_b):
 	# these look backwards to me but they work...
 	# if a > b, return -
 	# if a < b, return +
 	# if a = b, return 0
-	return priority_compare(task_a, task_b) or time_compare(task_a, task_b) or string_compare(task_a, task_b)
+	return priority_compare(item_a, item_b) or time_compare(item_a, item_b) or string_compare(item_a, item_b)
 
 # sorting key class
 class K(object):
@@ -183,7 +183,7 @@ class K(object):
 	def __ne__(self, other):
 		return line_compare(self.obj, other.obj) != 0
 
-# computes the md5 task id of a line
+# computes the md5 item id of a line
 def lineid(line):
 	line = line.strip()
 	return md5.new(line).hexdigest()[0:CONFIG['id_size']]
@@ -267,7 +267,7 @@ def format_line(line, indent=0, id = None, show_id = True):
 # read the file and return a list of sorted lines
 def read_file(filename):
 	if not os.path.isfile(filename):
-		return ['add a task with: ./trk.py "my very first task"']
+		return ['add a item with: ./trk.py "my very first item"']
 
 	try:
 		temp = open(filename, 'r+')
@@ -280,7 +280,7 @@ def read_file(filename):
 		temp.close()
 		return lines
 
-# read tasks
+# read items
 def read_lines(filename, match = ''):
 	count = 0
 	lines = read_file(filename)
@@ -516,34 +516,34 @@ def set_option(key, val):
 
 
 def main(args):
-	task = 'none'
+	item = 'none'
 	filename = '%s/%s' % (expanduser('~'), CONFIG['file'])
 
 	if len(args)>1: # more than one argument
 		cmd = args[0]
 		if cmd in ALIAS['delete']:
-			for task in args[1:]:
-				delete_lines(filename, task)
+			for item in args[1:]:
+				delete_lines(filename, item)
 			os.system(CONFIG['del_cmd'])
 
 		elif cmd in ALIAS['delete_body']:
-			for task in args[1:]:
-				delete_lines(filename, task, search_type = 'body')
+			for item in args[1:]:
+				delete_lines(filename, item, search_type = 'body')
 			os.system(CONFIG['del_cmd'])
 
 		elif cmd in ALIAS['edit']:
-			for task in args[1:]:
-				edit_lines(filename, task)
+			for item in args[1:]:
+				edit_lines(filename, item)
 			os.system(CONFIG['edit_cmd'])
 
 		elif cmd in ALIAS['edit_body']:
-			for task in args[1:]:
-				edit_lines(filename, task, search_type = 'body')
+			for item in args[1:]:
+				edit_lines(filename, item, search_type = 'body')
 			os.system(CONFIG['edit_cmd'])
 
 		elif cmd in ALIAS['add']:
-			for task in args[1:]:
-				add_line(filename, task)
+			for item in args[1:]:
+				add_line(filename, item)
 			os.system(CONFIG['add_cmd'])
 
 		elif cmd in ALIAS['search']:
@@ -556,35 +556,35 @@ def main(args):
 			read_lines_re(filename, match = args[1], exclusive = True)
 
 	elif len(args) == 1: # only one argument, probably an alias
-		task = args[0]
+		item = args[0]
 
-		if (task[0] in '+@#') and (' ' not in task) and len(task) > 1:
-			read_lines_re(filename, re.compile(r'(^|\s)(\%s([\w\/]*)%s)' % (task[0], task[1:])))
+		if (item[0] in '+@#') and (' ' not in item) and len(item) > 1:
+			read_lines_re(filename, re.compile(r'(^|\s)(\%s([\w\/]*)%s)' % (item[0], item[1:])))
 
-		elif task.isdigit():
-			if task[0] == '0':
+		elif item.isdigit():
+			if item[0] == '0':
 				read_lines_re(filename, match = '!\d', exclusive = True)
 			else:
-				read_lines(filename, '!%s' % task)
+				read_lines(filename, '!%s' % item)
 
-		elif task in ALIAS['hash']:
+		elif item in ALIAS['hash']:
 			print_tags(filename, RE['hash'])
 
-		elif task in ALIAS['plus']:
+		elif item in ALIAS['plus']:
 			print_tags(filename, RE['plus'])
 
-		elif task in ALIAS['at']:
+		elif item in ALIAS['at']:
 			print_tags(filename, RE['at'])
 
-		elif task in ALIAS['edit']:
+		elif item in ALIAS['edit']:
 			launch_file_editor(filename)
 			os.system(CONFIG['edit_cmd'])
 
-		elif task in ALIAS['list']:
+		elif item in ALIAS['list']:
 			read_lines(filename)
 
 		else: # no alias
-			add_line(filename, task)
+			add_line(filename, item)
 			os.system(CONFIG['add_cmd'])
 
 	else: # no arguments
