@@ -40,6 +40,7 @@ CONFIG = {
 	'hi_plus': 11,
 	'hi_at': 10,
 	'hi_priority': 9,
+	'hi_low_priority': 8,
 	'hi_due': 14,
 	'hi_due_soon': 10,
 	'hi_overdue': 9,
@@ -134,9 +135,15 @@ def priority_compare(item_a, item_b):
 	if priority_a is None and priority_b is None:
 		return 0
 	elif priority_a is None and priority_b is not None:
-		return 1
+		if priority_b.group(3) == '0':
+			return -1
+		else:
+			return 1
 	elif priority_a is not None and priority_b is None:
-		return -1
+		if priority_a.group(3) == '0':
+			return 1
+		else:
+			return -1
 
 	return int(priority_b.group(3)) - int(priority_a.group(3))
 
@@ -249,9 +256,12 @@ def format_line(line, indent=0, id = None, show_id = True):
 
 	# convert priority from !3 to !!!
 	has_priority = RE['priority'].search(line)
-	if has_priority != None:
-		priority_chars = CONFIG['priority_char'] * int(has_priority.group(3))
-		priority = highlight(priority_chars, CONFIG['hi_priority'])+' '
+	if has_priority is not None:
+		if has_priority.group(3) == '0':
+			priority = highlight(CONFIG['priority_char'], CONFIG['hi_low_priority']) + ' '
+		else:
+			priority_chars = CONFIG['priority_char'] * int(has_priority.group(3))
+			priority = highlight(priority_chars, CONFIG['hi_priority']) + ' '
 	else:
 		priority = ''
 
