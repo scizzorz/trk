@@ -1,20 +1,19 @@
 #!/usr/bin/env python
 import sys, os, getopt, md5, re, time, tempfile
-from os.path import expanduser
 
 # configuration
 # hopefully all of these will be ported to a .trkrc
 # and have command-line flags as well
 CONFIG = {
 	# where to find the config file
-	'config': '%s/%s' % (expanduser('~'), '.trkrc'),
+	'config': '~/.trkrc',
+
+	# todo filename
+	'file': '~/.todo',
 
 	# what character to use for indents
 	# how the heck do you change this in a config file...
 	'indent': '   ',
-
-	# todo filename
-	'file': '.todo',
 
 	# size of md5sum slice to use as item id
 	'id_size': 4,
@@ -528,7 +527,8 @@ def apply_arg_settings(options):
 # read / apply the settings from config file
 def rc_settings():
 	try:
-		lines = open(CONFIG['config'], 'r')
+		configfile = os.path.expanduser(CONFIG['config'])
+		lines = open(configfile, 'r')
 	except IOError:
 		# there wasn't anything there, no need to worry.
 		pass
@@ -559,7 +559,7 @@ def set_option(key, val):
 
 def main(args):
 	item = 'none'
-	filename = '%s/%s' % (expanduser('~'), CONFIG['file'])
+	filename = os.path.expanduser(CONFIG['file'])
 
 	# more than one argument
 	if len(args)>1:
