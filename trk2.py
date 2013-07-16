@@ -4,22 +4,27 @@ import bumpy, trk
 
 bumpy.config(cli = True)
 
+filename = os.path.expanduser(trk.CONFIG['file'])
+
 ## manipulation tasks
 @bumpy.task
 def add(*items):
-	for i in items:
-		print 'Adding {}'.format(i)
+	for item in items:
+		trk.add_line(filename, item)
+	os.system(trk.CONFIG['add_cmd'])
 
 @bumpy.task
-def edit(*ids):
-	for i in ids:
-		print 'Editing {}'.format(i)
+def edit(*items):
+	for item in items:
+		trk.edit_lines(filename, item)
+	os.system(trk.CONFIG['edit_cmd'])
 
 @bumpy.task
 # FIXME @bumpy.alias('finish', 'complete', 'done', 'hide', 'x')
-def delete(*ids):
-	for i in ids:
-		print 'Deleting {}'.format(i)
+def delete(*items):
+	for item in items:
+		trk.delete_lines(filename, item)
+	os.system(trk.CONFIG['del_cmd'])
 
 # FIXME @bumpy.task 'editsearch'
 # FIXME @bumpy.task 'deletesearch'
@@ -28,37 +33,43 @@ def delete(*ids):
 @bumpy.task
 # FIXME @bumpy.alias('#')
 def hash(*args):
-	for i in args:
-		print '#{}'.format(i)
+	if len(args):
+		trk.read_lines_re(filename, match = re.compile(r'(^|\s)(\#([\w\/]*)(%s))' % '|'.join(args)))
+	else:
+		trk.print_tags(filename, trk.RE['hash'])
 
 @bumpy.task
 # FIXME @bumpy.alias('+')
 def plus(*args):
-	for i in args:
-		print '+{}'.format(i)
+	if len(args):
+		trk.read_lines_re(filename, match = re.compile(r'(^|\s)(\+([\w\/]*)(%s))' % '|'.join(args)))
+	else:
+		trk.print_tags(filename, trk.RE['plus'])
 
 @bumpy.task
 # FIXME @bumpy.alias('@')
 def at(*args):
-	for i in args:
-		print '@{}'.format(i)
+	if len(args):
+		trk.read_lines_re(filename, match = re.compile(r'(^|\s)(\@([\w\/]*)(%s))' % '|'.join(args)))
+	else:
+		trk.print_tags(filename, trk.RE['at'])
 
 @bumpy.task
 def search(arg):
-	print 'Searching {}'.format(arg)
+	trk.read_lines(filename, arg)
 
 @bumpy.task
 def regex(arg):
-	print 'Regexing {}'.format(arg)
+	trk.read_lines_re(filename, match = arg)
 
 @bumpy.task
 def xregex(arg):
-	print 'Exclusive regexing {}'.format(arg)
+	trk.read_lines_re(filename, match = arg, exclusive = True)
 
 @bumpy.task
 # FIXME @bumpy.alias('all', 'list', 'ls')
 def show():
-	print 'Showing'
+	trk.read_lines(filename)
 
 @bumpy.default
 def default(*args):
@@ -68,4 +79,9 @@ def default(*args):
 		show()
 
 if __name__ == '__main__':
-	bumpy.main(sys.argv[1:])
+	options, argv = trk.arg_settings(sys.argv[1:])
+	trk.apply_arg_settings(options)
+	trk.rc_settings()
+	trk.apply_arg_settings(options)
+
+	bumpy.main(argv)
