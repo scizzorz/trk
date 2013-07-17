@@ -244,7 +244,6 @@ def add(*items):
 
 @bumpy.task
 def edit(*items):
-	# FIXME
 	if items:
 		for item in items:
 			for line in todo.find_id(item):
@@ -267,7 +266,6 @@ def delete(*items):
 # FIXME @bumpy.task 'deletesearch'
 
 ## search tasks
-@bumpy.task
 @bumpy.alias('#')
 def hash(*args):
 	if args:
@@ -277,7 +275,6 @@ def hash(*args):
 		# FIXME
 		trk.print_tags(filename, trk.RE['hash'])
 
-@bumpy.task
 @bumpy.alias('+')
 def plus(*args):
 	if args:
@@ -287,7 +284,6 @@ def plus(*args):
 		# FIXME
 		trk.print_tags(filename, trk.RE['plus'])
 
-@bumpy.task
 @bumpy.alias('@')
 def at(*args):
 	if args:
@@ -317,7 +313,6 @@ def xregex(arg):
 	todo.filter_xre(arg)
 	todo.display()
 
-@bumpy.task
 @bumpy.alias('all', 'list', 'ls')
 def show():
 	todo.display()
