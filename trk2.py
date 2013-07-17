@@ -254,7 +254,7 @@ def edit(*items):
 		todo.edit()
 
 @bumpy.task
-# FIXME @bumpy.alias('finish', 'complete', 'done', 'hide', 'x')
+@bumpy.alias('finish', 'complete', 'done', 'hide', 'x')
 def delete(*items):
 	for item in items:
 		for line in todo.find_id(item):
@@ -268,7 +268,7 @@ def delete(*items):
 
 ## search tasks
 @bumpy.task
-# FIXME @bumpy.alias('#')
+@bumpy.alias('#')
 def hash(*args):
 	if args:
 		todo.filter_re(r'(^|\s)(\#([\w\/]*)(%s))' % '|'.join(args))
@@ -278,7 +278,7 @@ def hash(*args):
 		trk.print_tags(filename, trk.RE['hash'])
 
 @bumpy.task
-# FIXME @bumpy.alias('+')
+@bumpy.alias('+')
 def plus(*args):
 	if args:
 		todo.filter_re(r'(^|\s)(\+([\w\/]*)(%s))' % '|'.join(args))
@@ -288,7 +288,7 @@ def plus(*args):
 		trk.print_tags(filename, trk.RE['plus'])
 
 @bumpy.task
-# FIXME @bumpy.alias('@')
+@bumpy.alias('@')
 def at(*args):
 	if args:
 		todo.filter_re(r'(^|\s)(\@([\w\/]*)(%s))' % '|'.join(args))
@@ -318,18 +318,20 @@ def xregex(arg):
 	todo.display()
 
 @bumpy.task
-# FIXME @bumpy.alias('all', 'list', 'ls')
+@bumpy.alias('all', 'list', 'ls')
 def show():
 	todo.display()
 
 
-# FIXME @bumpy.setup
+@bumpy.setup
+@bumpy.private
 def setup():
 	global todo
 	todo = File(os.path.expanduser(CONFIG['file']))
 	todo.read()
 
 @bumpy.default
+@bumpy.private
 def default(*args):
 	if args:
 		add(*args)
@@ -337,5 +339,4 @@ def default(*args):
 		show()
 
 if __name__ == '__main__':
-	setup()
 	bumpy.main(sys.argv[1:])
