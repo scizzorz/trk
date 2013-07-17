@@ -217,17 +217,17 @@ class Line:
 		return highlight(self.sid, COLORS['id']) + ' ' + pretty
 
 	def edit(self):
-		(temp, name) = tempfile.mkstemp(prefix = 'trk-', suffix = '.todo', text = True)
+		(fd, name) = tempfile.mkstemp(prefix = 'trk-', suffix = '.todo', text = True)
 		try:
-			with os.fdopen(temp, 'w') as temp2:
-				temp2.write(self.source)
+			with os.fdopen(fd, 'w') as temp:
+				temp.write(self.source)
 
 			os.system('{} "{}"'.format(CONFIG['editor'], name))
 
-			with open(name) as temp2:
-				self.source = temp2.read().strip()
+			with open(name) as temp:
+				self.source = temp.read().strip()
 				self.update()
-				print "Saving {}".format(self)
+				print "Saved {}".format(self)
 
 		finally:
 			os.unlink(name)
@@ -239,29 +239,29 @@ def add(*items):
 		line = Line(item)
 
 		print 'Added {}'.format(line)
-		temp.add(line)
-	temp.write()
+		todo.add(line)
+	todo.write()
 
 @bumpy.task
 def edit(*items):
 	# FIXME
 	if items:
 		for item in items:
-			for line in temp.find_id(item):
+			for line in todo.find_id(item):
 				line.edit()
-		temp.write()
+		todo.write()
 	else:
-		temp.edit()
+		todo.edit()
 
 @bumpy.task
 # FIXME @bumpy.alias('finish', 'complete', 'done', 'hide', 'x')
 def delete(*items):
 	for item in items:
-		for line in temp.find_id(item):
+		for line in todo.find_id(item):
 			print 'Deleted {}'.format(line)
 
-		temp.filter_xid(item)
-	temp.write()
+		todo.filter_xid(item)
+	todo.write()
 
 # FIXME @bumpy.task 'editsearch'
 # FIXME @bumpy.task 'deletesearch'
@@ -271,8 +271,8 @@ def delete(*items):
 # FIXME @bumpy.alias('#')
 def hash(*args):
 	if args:
-		temp.filter_re(r'(^|\s)(\#([\w\/]*)(%s))' % '|'.join(args))
-		temp.display()
+		todo.filter_re(r'(^|\s)(\#([\w\/]*)(%s))' % '|'.join(args))
+		todo.display()
 	else:
 		# FIXME
 		trk.print_tags(filename, trk.RE['hash'])
@@ -281,8 +281,8 @@ def hash(*args):
 # FIXME @bumpy.alias('+')
 def plus(*args):
 	if args:
-		temp.filter_re(r'(^|\s)(\+([\w\/]*)(%s))' % '|'.join(args))
-		temp.display()
+		todo.filter_re(r'(^|\s)(\+([\w\/]*)(%s))' % '|'.join(args))
+		todo.display()
 	else:
 		# FIXME
 		trk.print_tags(filename, trk.RE['plus'])
@@ -291,43 +291,43 @@ def plus(*args):
 # FIXME @bumpy.alias('@')
 def at(*args):
 	if args:
-		temp.filter_re(r'(^|\s)(\@([\w\/]*)(%s))' % '|'.join(args))
-		temp.display()
+		todo.filter_re(r'(^|\s)(\@([\w\/]*)(%s))' % '|'.join(args))
+		todo.display()
 	else:
 		# FIXME
 		trk.print_tags(filename, trk.RE['at'])
 
 @bumpy.task
 def search(arg):
-	temp.filter_se(arg)
-	temp.display()
+	todo.filter_se(arg)
+	todo.display()
 
 @bumpy.task
 def xsearch(arg):
-	temp.filter_xse(arg)
-	temp.display()
+	todo.filter_xse(arg)
+	todo.display()
 
 @bumpy.task
 def regex(arg):
-	temp.filter_re(arg)
-	temp.display()
+	todo.filter_re(arg)
+	todo.display()
 
 @bumpy.task
 def xregex(arg):
-	temp.filter_xre(arg)
-	temp.display()
+	todo.filter_xre(arg)
+	todo.display()
 
 @bumpy.task
 # FIXME @bumpy.alias('all', 'list', 'ls')
 def show():
-	temp.display()
+	todo.display()
 
 
 # FIXME @bumpy.setup
 def setup():
-	global temp
-	temp = File(os.path.expanduser(CONFIG['file']))
-	temp.read()
+	global todo
+	todo = File(os.path.expanduser(CONFIG['file']))
+	todo.read()
 
 @bumpy.default
 def default(*args):
