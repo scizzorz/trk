@@ -252,7 +252,13 @@ def edit(*items):
 	else:
 		todo.edit()
 
-@bumpy.task
+@bumpy.alias('esearch')
+def editsearch(*items):
+	for item in items:
+		for line in todo.find_se(item):
+			line.edit()
+	todo.write()
+
 @bumpy.alias('finish', 'complete', 'done', 'hide', 'x')
 def delete(*items):
 	for item in items:
@@ -261,6 +267,17 @@ def delete(*items):
 
 		todo.filter_xid(item)
 	todo.write()
+
+
+@bumpy.alias('dsearch')
+def deletesearch(*items):
+	for item in items:
+		for line in todo.find_se(item):
+			print 'Deleted {}'.format(line)
+
+		todo.filter_xse(item)
+	todo.write()
+
 
 # FIXME @bumpy.task 'editsearch'
 # FIXME @bumpy.task 'deletesearch'
