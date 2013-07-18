@@ -74,6 +74,8 @@ def date_to_mktime(datestring):
 		timestamp = time.strptime(' '.join(time_tuple), '%m %d %Y %I %M %p')
 		return time.mktime(timestamp)
 
+	return 0
+
 def format_date(obj):
 	ret = obj.group(2) + '/' + obj.group(3)
 
@@ -122,6 +124,7 @@ class File:
 			print "File.write() IOError"
 		else:
 			with temp:
+				self.sort()
 				for line in self.lines:
 					temp.write(line.source + '\n')
 
@@ -134,9 +137,12 @@ class File:
 	def edit_each(self):
 		for line in self.lines:
 			line.edit()
+		self.write()
 
 	def edit(self):
 		os.system('{} "{}"'.format(CONFIG['editor'], self.filename))
+		self.read()
+		self.write()
 
 	def display(self):
 		if self.lines is None:
@@ -146,6 +152,9 @@ class File:
 
 		for line in self.lines:
 			print line
+
+	def sort(self):
+		self.lines.sort()
 
 	def find_id(self, search):
 		return [line for line in self.lines if (line.uid.startswith(search))]
@@ -175,11 +184,11 @@ class File:
 
 
 class Line:
+	source = None
 	uid = None
 	sid = None
-	priority = None
-	due = None
-	source = None
+	priority = 0
+	due = 0
 
 	def __init__(self, source):
 		self.source = source.strip()
@@ -195,8 +204,8 @@ class Line:
 		priority = RE['priority'].search(self.source)
 		if priority is not None:
 			self.priority = int(priority.group(3))
-		else:
-			self.priority = None
+			if self.priority == 0:
+				self.priority = -1
 
 		self.due = date_to_mktime(self.source)
 
@@ -209,9 +218,9 @@ class Line:
 		pretty = RE['priority'].sub('', pretty)
 		pretty = RE['due'].sub(format_date, pretty)
 
-		if self.priority:
+		if self.priority > 0:
 			pretty = highlight(CONFIG['priority'] * self.priority, COLORS['priority']) + pretty
-		elif self.priority is not None:
+		elif self.priority < 0:
 			pretty = highlight(CONFIG['priority'], COLORS['low_priority']) + pretty
 
 		return highlight(self.sid, COLORS['id']) + ' ' + pretty
@@ -231,6 +240,39 @@ class Line:
 
 		finally:
 			os.unlink(name)
+
+	def str_cmp(self, other):
+		str_self = RE['priority'].sub('', self.source)
+		str_self = RE['due'].sub('', str_self)
+		str_self = RE['whitespace'].sub('', str_self)
+		str_other = RE['priority'].sub('', other.source)
+		str_other = RE['due'].sub('', str_other)
+		str_other = RE['whitespace'].sub('', str_other)
+
+		return cmp(str_self, str_other)
+
+	def due_cmp(self, other):
+		return other.due - self.due
+
+	def priority_cmp(self, other):
+		return other.priority - self.priority
+
+	def cmp(self, other):
+		return self.priority_cmp(other) or self.due_cmp(other) or self.str_cmp(other)
+
+	def __lt__(self, other):
+		return self.cmp(other) < 0
+	def __gt__(self, other):
+		return self.cmp(other) > 0
+	def __eq__(self, other):
+		return self.cmp(other) == 0
+	def __le__(self, other):
+		return self.cmp(other) <= 0
+	def __ge__(self, other):
+		return self.cmp(other) >= 0
+	def __ne__(self, other):
+		return self.cmp(other) != 0
+
 
 ## manipulation tasks
 @bumpy.task
