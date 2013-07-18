@@ -2,7 +2,7 @@
 import sys, os, md5, re, time, tempfile
 import bumpy, trk
 
-bumpy.config(cli = True)
+bumpy.config(cli = True, suppress = ('all'))
 
 CONFIG = {
 	'config': '~/.trkrc',
