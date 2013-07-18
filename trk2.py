@@ -330,7 +330,7 @@ def deletesearch(*items):
 def hash(*args):
 	'''Filter by hashtags or display as a hashtag tree.'''
 	if args:
-		todo.filter_re(r'(^|\s)(\#([\w\/]*)(%s))' % '|'.join(args))
+		todo.filter_re(r'(^|\s)(\#([\w\/]*)(%s)(\s|\/|$))' % '|'.join(args))
 		todo.display()
 	else:
 		# FIXME
@@ -340,7 +340,7 @@ def hash(*args):
 def plus(*args):
 	'''Filter by plustags or display as a plustag tree.'''
 	if args:
-		todo.filter_re(r'(^|\s)(\+([\w\/]*)(%s))' % '|'.join(args))
+		todo.filter_re(r'(^|\s)(\+([\w\/]*)(%s)(\s|\/|$))' % '|'.join(args))
 		todo.display()
 	else:
 		# FIXME
@@ -350,7 +350,7 @@ def plus(*args):
 def at(*args):
 	'''Filter by attags or display as an attag tree.'''
 	if args:
-		todo.filter_re(r'(^|\s)(\@([\w\/]*)(%s))' % '|'.join(args))
+		todo.filter_re(r'(^|\s)(\@([\w\/]*)(%s)(\s|\/|$))' % '|'.join(args))
 		todo.display()
 	else:
 		# FIXME
