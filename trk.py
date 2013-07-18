@@ -49,7 +49,7 @@ CONFIG = {
 	'add_cmd': '',
 	'edit_cmd': '',
 	'del_cmd': ''
-}
+	}
 
 # formatting dictionary
 LOCALE = {
@@ -62,7 +62,7 @@ LOCALE = {
 	'label': '%s %s items',
 	'label_single': '%s %s item',
 	'everything': 'everything else'
-}
+	}
 
 # command alias dictionary
 ALIAS = {
@@ -79,7 +79,7 @@ ALIAS = {
 	'search': ('search', 'find', 'se', 'fi', 's', 'f'),
 	'regex': ('regex', 're'),
 	'xregex': ('xregex', 'xre')
-}
+	}
 
 # regexes used to highlight colors
 RE = {
@@ -91,7 +91,7 @@ RE = {
 	'whitespace': re.compile(r'\s+'),
 
 	'setting': re.compile(r'(\w+)\s*\=\s*(.*)')
-}
+	}
 
 def date_to_mktime(datestring):
 	match = RE['due'].search(datestring)
