@@ -153,6 +153,59 @@ class File:
 		for line in self.lines:
 			print line
 
+	def display_tags(self, search):
+		tags = dict()
+
+		for line in self.lines:
+			line_tags = search.findall(line.source)
+
+			if not line_tags:
+				line_tags.append(('', 'uncategorized', 'uncategorized'))
+
+			for _, tag, _ in line_tags:
+				subtags = tag.split('/')
+				root = tags
+				btag = ''
+
+				for subtag in subtags:
+					if btag:
+						btag += '/'
+					btag += subtag
+
+					if btag not in root:
+						root[btag] = {}
+					root = root[btag]
+
+				if '__base' not in root:
+					root['__base'] = []
+
+				root['__base'].append(line)
+
+		self.display_tags_aux(tags)
+
+	def display_tags_aux(self, root, depth=-1, label="__root"):
+		if depth >= 0:
+			temp = label.split('/')
+
+			if len(temp) > 1:
+				display_label = label[0] + temp[-1]
+
+			else:
+				display_label = label
+
+			print '{}{}'.format(CONFIG['indent'] * depth, Line(display_label, no_id = True))
+
+		if '__base' in root:
+			for line in root['__base']:
+				line.source = line.source.replace(label, '').strip()
+				temp = '{}{}'.format(CONFIG['indent'] * (depth + 1), line)
+				print temp
+
+		tags = sorted(root.keys())
+		for tag in tags:
+			if tag != '__base':
+				self.display_tags_aux(root[tag], depth+1, tag)
+
 	def sort(self):
 		self.lines.sort()
 
@@ -190,8 +243,9 @@ class Line:
 	priority = 0
 	due = 0
 
-	def __init__(self, source):
+	def __init__(self, source, no_id = False):
 		self.source = source.strip()
+		self.no_id = no_id
 		self.update()
 
 	def __repr__(self):
@@ -222,6 +276,9 @@ class Line:
 			pretty = highlight(CONFIG['priority'] * self.priority, COLORS['priority']) + pretty
 		elif self.priority < 0:
 			pretty = highlight(CONFIG['priority'], COLORS['low_priority']) + pretty
+
+		if self.no_id:
+			return pretty
 
 		return highlight(self.sid, COLORS['id']) + ' ' + pretty
 
@@ -331,30 +388,24 @@ def hash(*args):
 	'''Filter by hashtags or display as a hashtag tree.'''
 	if args:
 		todo.filter_re(r'(^|\s)(\#([\w\/]*)(%s)(\s|\/|$))' % '|'.join(args))
-		todo.display()
-	else:
-		# FIXME
-		trk.print_tags(filename, trk.RE['hash'])
+
+	todo.display_tags(RE['hash'])
 
 @bumpy.alias('+')
 def plus(*args):
 	'''Filter by plustags or display as a plustag tree.'''
 	if args:
 		todo.filter_re(r'(^|\s)(\+([\w\/]*)(%s)(\s|\/|$))' % '|'.join(args))
-		todo.display()
-	else:
-		# FIXME
-		trk.print_tags(filename, trk.RE['plus'])
+
+	todo.display_tags(RE['plus'])
 
 @bumpy.alias('@')
 def at(*args):
 	'''Filter by attags or display as an attag tree.'''
 	if args:
 		todo.filter_re(r'(^|\s)(\@([\w\/]*)(%s)(\s|\/|$))' % '|'.join(args))
-		todo.display()
-	else:
-		# FIXME
-		trk.print_tags(filename, trk.RE['at'])
+
+	todo.display_tags(RE['at'])
 
 @bumpy.task
 def search(arg):
