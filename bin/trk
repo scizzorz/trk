@@ -1,2 +1,2 @@
 #!/bin/sh
-python -m trk2 "$@"
+python -m trk "$@"
