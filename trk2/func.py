@@ -1,46 +1,5 @@
-#!/usr/bin/env python
-import sys, os, md5, re, time, tempfile
-import bumpy, trk
-
-bumpy.config(cli = True, suppress = ('all'))
-
-CONFIG = {
-	'config': '~/.trkrc',
-	'file': '~/.todo',
-	'editor': 'vim',
-
-	'id_size': 4,
-	'indent': '    ',
-	'priority': '*',
-	'soon': 86400,
-	}
-
-COLORS = {
-	'id': 8,
-	'count': 8,
-
-	'plus': 12,
-	'at': 2,
-	'hash': 14,
-
-	'priority': 1,
-	'low_priority': 8,
-
-	'due': 6,
-	'due_soon': 4,
-	'overdue': 1,
-	}
-
-RE = {
-	'hash': re.compile(r'(^|\s)(\#([\w\/]+))'),
-	'plus': re.compile(r'(^|\s)(\+([\w\/]+))'),
-	'at':   re.compile(r'(^|\s)(\@([\w\/]+))'),
-	'priority': re.compile(r'(^|\s)(\!(\d))'),
-	'due': re.compile(r'(\[*(\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*\]*)'),
-	'whitespace': re.compile(r'\s+'),
-
-	'setting': re.compile(r'(\w+)\s*\=\s*(.*)')
-	}
+import os, md5, re, time, tempfile
+from .var import COLORS, CONFIG, RE
 
 ## functions
 def highlight(string, color):
@@ -181,9 +140,9 @@ class File:
 
 				root['__base'].append(line)
 
-		self.display_tags_aux(tags)
+		self._display_tags_aux(tags)
 
-	def display_tags_aux(self, root, depth=-1, label="__root"):
+	def _display_tags_aux(self, root, depth=-1, label="__root"):
 		if depth >= 0:
 			temp = label.split('/')
 
@@ -204,7 +163,7 @@ class File:
 		tags = sorted(root.keys())
 		for tag in tags:
 			if tag != '__base':
-				self.display_tags_aux(root[tag], depth+1, tag)
+				self._display_tags_aux(root[tag], depth+1, tag)
 
 	def sort(self):
 		self.lines.sort()
@@ -234,7 +193,6 @@ class File:
 		self.lines = self.find_re(search)
 	def filter_xre(self, search):
 		self.lines = self.find_xre(search)
-
 
 class Line:
 	source = None
@@ -283,9 +241,9 @@ class Line:
 		return highlight(self.sid, COLORS['id']) + ' ' + pretty
 
 	def edit(self):
-		(fd, name) = tempfile.mkstemp(prefix = 'trk-', suffix = '.todo', text = True)
+		(desc, name) = tempfile.mkstemp(prefix = 'trk-', suffix = '.todo', text = True)
 		try:
-			with os.fdopen(fd, 'w') as temp:
+			with os.fdopen(desc, 'w') as temp:
 				temp.write(self.source)
 
 			os.system('{} "{}"'.format(CONFIG['editor'], name))
@@ -329,129 +287,3 @@ class Line:
 		return self.cmp(other) >= 0
 	def __ne__(self, other):
 		return self.cmp(other) != 0
-
-
-## manipulation tasks
-@bumpy.task
-def add(*items):
-	'''Add items to the list.'''
-	for item in items:
-		line = Line(item)
-
-		print 'Added {}'.format(line)
-		todo.add(line)
-	todo.write()
-
-@bumpy.task
-def edit(*items):
-	'''Edit items with certain IDs.'''
-	if items:
-		for item in items:
-			for line in todo.find_id(item):
-				line.edit()
-		todo.write()
-	else:
-		todo.edit()
-
-@bumpy.alias('esearch')
-def editsearch(*items):
-	'''Edit items that contain search terms.'''
-	for item in items:
-		for line in todo.find_se(item):
-			line.edit()
-	todo.write()
-
-@bumpy.alias('finish', 'complete', 'done', 'hide', 'x')
-def delete(*items):
-	'''Delete items with certain IDs.'''
-	for item in items:
-		for line in todo.find_id(item):
-			print 'Deleted {}'.format(line)
-
-		todo.filter_xid(item)
-	todo.write()
-
-
-@bumpy.alias('dsearch')
-def deletesearch(*items):
-	'''Delete items that contain search terms.'''
-	for item in items:
-		for line in todo.find_se(item):
-			print 'Deleted {}'.format(line)
-
-		todo.filter_xse(item)
-	todo.write()
-
-## search tasks
-@bumpy.alias('#')
-def hash(*args):
-	'''Filter by hashtags or display as a hashtag tree.'''
-	if args:
-		todo.filter_re(r'(^|\s)(\#([\w\/]*)(%s)(\s|\/|$))' % '|'.join(args))
-
-	todo.display_tags(RE['hash'])
-
-@bumpy.alias('+')
-def plus(*args):
-	'''Filter by plustags or display as a plustag tree.'''
-	if args:
-		todo.filter_re(r'(^|\s)(\+([\w\/]*)(%s)(\s|\/|$))' % '|'.join(args))
-
-	todo.display_tags(RE['plus'])
-
-@bumpy.alias('@')
-def at(*args):
-	'''Filter by attags or display as an attag tree.'''
-	if args:
-		todo.filter_re(r'(^|\s)(\@([\w\/]*)(%s)(\s|\/|$))' % '|'.join(args))
-
-	todo.display_tags(RE['at'])
-
-@bumpy.task
-def search(arg):
-	'''List items that contain a search term.'''
-	todo.filter_se(arg)
-	todo.display()
-
-@bumpy.task
-def xsearch(arg):
-	'''List items that do not contain a search term.'''
-	todo.filter_xse(arg)
-	todo.display()
-
-@bumpy.task
-def regex(arg):
-	'''List items that match a regular expression.'''
-	todo.filter_re(arg)
-	todo.display()
-
-@bumpy.task
-def xregex(arg):
-	'''List items that do not match a regular expression.'''
-	todo.filter_xre(arg)
-	todo.display()
-
-@bumpy.alias('all', 'list', 'ls')
-def show():
-	'''List all items.'''
-	todo.display()
-
-
-@bumpy.setup
-@bumpy.private
-def setup():
-	global todo
-	todo = File(os.path.expanduser(CONFIG['file']))
-	todo.read()
-
-@bumpy.default
-@bumpy.private
-def default(*args):
-	'''Add items to the list or display it.'''
-	if args:
-		add(*args)
-	else:
-		show()
-
-if __name__ == '__main__':
-	bumpy.main(sys.argv[1:])
