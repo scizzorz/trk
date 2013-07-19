@@ -37,3 +37,12 @@ RE = {
 
 	'setting': re.compile(r'(\w+)\s*\=\s*(.*)')
 	}
+
+LOCALE = {
+	'ioerror': 'Unable to open file "{}" for {}',
+	'added': 'Added {}',
+	'deleted': 'Deleted {}',
+	'saved': 'Saved {}',
+	'uncategorized': 'uncategorized',
+	}
+

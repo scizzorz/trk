@@ -1,5 +1,5 @@
 import os, md5, re, time, tempfile
-from .var import COLORS, CONFIG, RE
+from .var import COLORS, CONFIG, RE, LOCALE
 
 ## functions
 def highlight(string, color):
@@ -69,8 +69,7 @@ class File:
 		try:
 			temp = open(self.filename)
 		except IOError:
-			# FIXME
-			print "File.read() IOError"
+			print LOCALE['ioerror'].format(self.filename, 'reading')
 		else:
 			with temp:
 				self.lines = [Line(line) for line in temp if line.strip()]
@@ -79,8 +78,7 @@ class File:
 		try:
 			temp = open(self.filename, 'w')
 		except IOError:
-			# FIXME
-			print "File.write() IOError"
+			print LOCALE['ioerror'].format(self.filename, 'writing')
 		else:
 			with temp:
 				self.sort()
@@ -105,8 +103,6 @@ class File:
 
 	def display(self):
 		if self.lines is None:
-			# FIXME
-			print "Nothing to File.display() here"
 			return
 
 		for line in self.lines:
@@ -142,7 +138,7 @@ class File:
 
 		self._display_tags_aux(tags)
 
-	def _display_tags_aux(self, root, depth=-1, label="__root"):
+	def _display_tags_aux(self, root, depth=-1, label='__root'):
 		if depth >= 0:
 			temp = label.split('/')
 
@@ -251,7 +247,7 @@ class Line:
 			with open(name) as temp:
 				self.source = temp.read().strip()
 				self.update()
-				print "Saved {}".format(self)
+				print LOCALE['saved'].format(self)
 
 		finally:
 			os.unlink(name)

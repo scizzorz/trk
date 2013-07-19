@@ -1,7 +1,7 @@
 import os
 import bumpy
 from .func import File, Line
-from .var import CONFIG, RE
+from .var import CONFIG, RE, LOCALE
 
 ## manipulation tasks
 @bumpy.task
@@ -10,7 +10,7 @@ def add(*items):
 	for item in items:
 		line = Line(item)
 
-		print 'Added {}'.format(line)
+		print LOCALE['added'].format(line)
 		todo.add(line)
 	todo.write()
 
@@ -38,7 +38,7 @@ def delete(*items):
 	'''Delete items with certain IDs.'''
 	for item in items:
 		for line in todo.find_id(item):
-			print 'Deleted {}'.format(line)
+			print LOCALE['deleted'].format(line)
 
 		todo.filter_xid(item)
 	todo.write()
@@ -49,7 +49,7 @@ def deletesearch(*items):
 	'''Delete items that contain search terms.'''
 	for item in items:
 		for line in todo.find_se(item):
-			print 'Deleted {}'.format(line)
+			print LOCALE['deleted'].format(line)
 
 		todo.filter_xse(item)
 	todo.write()
