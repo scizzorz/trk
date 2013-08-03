@@ -19,9 +19,7 @@ def date_to_mktime(datestring):
 
 		year = match.group(5) or time.strftime('%Y')
 
-		if len(year) == 3:
-			year = time.strftime('%Y')
-		elif len(year) == 2:
+		if len(year) == 2:
 			year = '20'+year
 
 		hour = match.group(7) or '11'

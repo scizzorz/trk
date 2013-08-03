@@ -32,7 +32,7 @@ RE = {
 	'plus': re.compile(r'(^|\s)(\+([\w\/]+))'),
 	'at':   re.compile(r'(^|\s)(\@([\w\/]+))'),
 	'priority': re.compile(r'(^|\s)(\!(\d))'),
-	'due': re.compile(r'((\d{1,2})/(\d{1,2})(/(\d{2,4}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*)'),
+	'due': re.compile(r'((\d{1,2})/(\d{1,2})(/(\d{2}))*([@ ](\d{1,2})(:(\d{1,2}))*(am|pm)*)*)'),
 	'whitespace': re.compile(r'\s+'),
 
 	'setting': re.compile(r'(\w+)\s*\=\s*(.*)')
