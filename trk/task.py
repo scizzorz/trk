@@ -33,7 +33,7 @@ def editsearch(*items):
 			line.edit()
 	todo.write()
 
-@bumpy.alias('finish', 'complete', 'done', 'hide', 'x')
+@bumpy.alias('x')
 def delete(*items):
 	'''Delete items with certain IDs.'''
 	for item in items:
