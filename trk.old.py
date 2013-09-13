@@ -1,20 +1,19 @@
 #!/usr/bin/env python
 import sys, os, getopt, md5, re, time, tempfile
-from os.path import expanduser
 
 # configuration
 # hopefully all of these will be ported to a .trkrc
 # and have command-line flags as well
 CONFIG = {
 	# where to find the config file
-	'config': '%s/%s' % (expanduser('~'), '.trkrc'),
+	'config': '~/.trkrc',
+
+	# todo filename
+	'file': '~/.todo',
 
 	# what character to use for indents
 	# how the heck do you change this in a config file...
 	'indent': '   ',
-
-	# todo filename
-	'file': '.todo',
 
 	# size of md5sum slice to use as item id
 	'id_size': 4,
@@ -40,6 +39,7 @@ CONFIG = {
 	'hi_plus': 11,
 	'hi_at': 10,
 	'hi_priority': 9,
+	'hi_low_priority': 8,
 	'hi_due': 14,
 	'hi_due_soon': 10,
 	'hi_overdue': 9,
@@ -49,7 +49,7 @@ CONFIG = {
 	'add_cmd': '',
 	'edit_cmd': '',
 	'del_cmd': ''
-}
+	}
 
 # formatting dictionary
 LOCALE = {
@@ -62,7 +62,7 @@ LOCALE = {
 	'label': '%s %s items',
 	'label_single': '%s %s item',
 	'everything': 'everything else'
-}
+	}
 
 # command alias dictionary
 ALIAS = {
@@ -79,7 +79,7 @@ ALIAS = {
 	'search': ('search', 'find', 'se', 'fi', 's', 'f'),
 	'regex': ('regex', 're'),
 	'xregex': ('xregex', 'xre')
-}
+	}
 
 # regexes used to highlight colors
 RE = {
@@ -91,7 +91,7 @@ RE = {
 	'whitespace': re.compile(r'\s+'),
 
 	'setting': re.compile(r'(\w+)\s*\=\s*(.*)')
-}
+	}
 
 def date_to_mktime(datestring):
 	match = RE['due'].search(datestring)
@@ -134,9 +134,15 @@ def priority_compare(item_a, item_b):
 	if priority_a is None and priority_b is None:
 		return 0
 	elif priority_a is None and priority_b is not None:
-		return 1
+		if priority_b.group(3) == '0':
+			return -1
+		else:
+			return 1
 	elif priority_a is not None and priority_b is None:
-		return -1
+		if priority_a.group(3) == '0':
+			return 1
+		else:
+			return -1
 
 	return int(priority_b.group(3)) - int(priority_a.group(3))
 
@@ -249,9 +255,12 @@ def format_line(line, indent=0, id = None, show_id = True):
 
 	# convert priority from !3 to !!!
 	has_priority = RE['priority'].search(line)
-	if has_priority != None:
-		priority_chars = CONFIG['priority_char'] * int(has_priority.group(3))
-		priority = highlight(priority_chars, CONFIG['hi_priority'])+' '
+	if has_priority is not None:
+		if has_priority.group(3) == '0':
+			priority = highlight(CONFIG['priority_char'], CONFIG['hi_low_priority']) + ' '
+		else:
+			priority_chars = CONFIG['priority_char'] * int(has_priority.group(3))
+			priority = highlight(priority_chars, CONFIG['hi_priority']) + ' '
 	else:
 		priority = ''
 
@@ -518,7 +527,8 @@ def apply_arg_settings(options):
 # read / apply the settings from config file
 def rc_settings():
 	try:
-		lines = open(CONFIG['config'], 'r')
+		configfile = os.path.expanduser(CONFIG['config'])
+		lines = open(configfile, 'r')
 	except IOError:
 		# there wasn't anything there, no need to worry.
 		pass
@@ -549,7 +559,7 @@ def set_option(key, val):
 
 def main(args):
 	item = 'none'
-	filename = '%s/%s' % (expanduser('~'), CONFIG['file'])
+	filename = os.path.expanduser(CONFIG['file'])
 
 	# more than one argument
 	if len(args)>1:
