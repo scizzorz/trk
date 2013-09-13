@@ -150,9 +150,15 @@ class File:
 
 		if '__base' in root:
 			for line in root['__base']:
+				# save the original source
+				temp = line.source
+
+				# filter current tag and print (using __repr__()!)
 				line.source = line.source.replace(label, '').strip()
-				temp = '{}{}'.format(CONFIG['indent'] * (depth + 1), line)
-				print temp
+				print '{}{}'.format(CONFIG['indent'] * (depth + 1), line)
+
+				# restore original source
+				line.source = temp
 
 		tags = sorted(root.keys())
 		for tag in tags:
