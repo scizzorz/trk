@@ -61,27 +61,37 @@ def format_date(obj):
 class File:
 	def __init__(self, filename):
 		self.filename = filename
-		self.lines = None
+		self.lines = []
 
 	def read(self):
+		if not os.path.exists(self.filename):
+			try:
+				temp = open(self.filename, 'w+')
+			except IOError:
+				print LOCALE['ioerror'].format(self.filename, 'creating')
+			finally:
+				temp.close()
+
 		try:
 			temp = open(self.filename)
 		except IOError:
 			print LOCALE['ioerror'].format(self.filename, 'reading')
 		else:
-			with temp:
-				self.lines = [Line(line) for line in temp if line.strip()]
+			self.lines = [Line(line) for line in temp if line.strip()]
+		finally:
+			temp.close()
 
 	def write(self):
 		try:
-			temp = open(self.filename, 'w')
+			temp = open(self.filename, 'w+')
 		except IOError:
 			print LOCALE['ioerror'].format(self.filename, 'writing')
 		else:
-			with temp:
-				self.sort()
-				for line in self.lines:
-					temp.write(line.source + '\n')
+			self.sort()
+			for line in self.lines:
+				temp.write(line.source + '\n')
+		finally:
+			temp.close()
 
 	def add(self, source):
 		if type(source) is str:
@@ -243,7 +253,7 @@ class Line:
 	def edit(self):
 		(desc, name) = tempfile.mkstemp(prefix = 'trk-', suffix = '.todo', text = True)
 		try:
-			with os.fdopen(desc, 'w') as temp:
+			with os.fdopen(desc, 'w+') as temp:
 				temp.write(self.source)
 
 			os.system('{} "{}"'.format(CONFIG['editor'], name))
