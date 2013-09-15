@@ -2,6 +2,8 @@
 
 A nice little command-line interface for organizing tasks and small notes.
 
+**(this entire README is currently out of date; I'll update it shortly!)**
+
 ## Usage
 
 ### Modification commands
