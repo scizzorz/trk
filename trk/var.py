@@ -3,7 +3,6 @@ import re
 CONFIG = {
 	'config': '~/.trkrc',
 	'file': '~/.todo',
-	'editor': 'vim',
 
 	'id_size': 4,
 	'indent': '    ',

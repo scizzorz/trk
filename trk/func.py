@@ -105,7 +105,7 @@ class File:
 		self.write()
 
 	def edit(self):
-		os.system('{} "{}"'.format(CONFIG['editor'], self.filename))
+		os.system('{} "{}"'.format(os.getenv('EDITOR', 'nano'), self.filename))
 		self.read()
 		self.write()
 
@@ -256,7 +256,7 @@ class Line:
 			with os.fdopen(desc, 'w+') as temp:
 				temp.write(self.source)
 
-			os.system('{} "{}"'.format(CONFIG['editor'], name))
+			os.system('{} "{}"'.format(os.getenv('EDITOR', 'nano'), name))
 
 			with open(name) as temp:
 				self.source = temp.read().strip()
