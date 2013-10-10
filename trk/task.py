@@ -1,10 +1,12 @@
-import os
-import bumpy
+import bumpy, os
+from functools import partial
 from .func import File, Line
 from .var import CONFIG, RE, LOCALE
 
+task = partial(bumpy.task, namespace='')
+
 ## manipulation tasks
-@bumpy.task
+@task('consume')
 def add(*items):
 	'''Add items to the list.'''
 	for item in items:
@@ -14,7 +16,7 @@ def add(*items):
 		todo.add(line)
 	todo.write()
 
-@bumpy.task
+@task('consume')
 def edit(*items):
 	'''Edit items with certain IDs.'''
 	if items:
@@ -25,7 +27,7 @@ def edit(*items):
 	else:
 		todo.edit()
 
-@bumpy.alias('esearch')
+@task('consume', alias='esearch')
 def editsearch(*items):
 	'''Edit items that contain search terms.'''
 	for item in items:
@@ -33,7 +35,7 @@ def editsearch(*items):
 			line.edit()
 	todo.write()
 
-@bumpy.alias('x')
+@task('consume', alias='x')
 def delete(*items):
 	'''Delete items with certain IDs.'''
 	for item in items:
@@ -44,7 +46,7 @@ def delete(*items):
 	todo.write()
 
 
-@bumpy.alias('dsearch')
+@task('consume', alias='dsearch')
 def deletesearch(*items):
 	'''Delete items that contain search terms.'''
 	for item in items:
@@ -55,7 +57,7 @@ def deletesearch(*items):
 	todo.write()
 
 ## search tasks
-@bumpy.alias('#')
+@task('consume', alias='#')
 def hash(*args):
 	'''Filter by hashtags or display as a hashtag tree.'''
 	if args:
@@ -63,7 +65,7 @@ def hash(*args):
 
 	todo.display_tags(RE['hash'])
 
-@bumpy.alias('+')
+@task('consume', alias='+')
 def plus(*args):
 	'''Filter by plustags or display as a plustag tree.'''
 	if args:
@@ -71,7 +73,7 @@ def plus(*args):
 
 	todo.display_tags(RE['plus'])
 
-@bumpy.alias('@')
+@task('consume', alias='@')
 def at(*args):
 	'''Filter by attags or display as an attag tree.'''
 	if args:
@@ -79,47 +81,45 @@ def at(*args):
 
 	todo.display_tags(RE['at'])
 
-@bumpy.task
+@task()
 def search(arg):
 	'''List items that contain a search term.'''
 	todo.filter_se(arg)
 	todo.display()
 
-@bumpy.task
+@task()
 def xsearch(arg):
 	'''List items that do not contain a search term.'''
 	todo.filter_xse(arg)
 	todo.display()
 
-@bumpy.task
+@task()
 def regex(arg):
 	'''List items that match a regular expression.'''
 	todo.filter_re(arg)
 	todo.display()
 
-@bumpy.task
+@task()
 def xregex(arg):
 	'''List items that do not match a regular expression.'''
 	todo.filter_xre(arg)
 	todo.display()
 
-@bumpy.alias('all', 'list', 'ls')
+@task(alias=('all', 'list', 'ls'))
 def show():
 	'''List all items.'''
 	todo.display()
 
 
-@bumpy.setup
-@bumpy.private
-def setup():
+@task('setup')
+def _setup():
 	global todo
 	todo = File(os.path.expanduser(CONFIG['file']))
 	todo.read()
 
 
-@bumpy.default
-@bumpy.private
-def default(*args):
+@task('default')
+def _default(*args):
 	'''Add items to the list or display it.'''
 	if args:
 		add(*args)
